@@ -58,10 +58,18 @@ requirejs.config({
         // Example of how to define the key (you make up the key) and the URL
         // Make sure you DO NOT put the .js at the end of the URL
         // SmoothieCharts: '//smoothiecharts.org/smoothie',
+        Three: '//i2dcui.appspot.com/geturl?url=http://threejs.org/build/three.min.js',
+        ThreeTextGeometry: '//i2dcui.appspot.com/js/three/TextGeometry',
+        ThreeFontUtils: '//i2dcui.appspot.com/js/three/FontUtils',
+        ThreeHelvetiker: '//i2dcui.appspot.com/js/three/threehelvetiker',
+        Clipper: '//i2dcui.appspot.com/js/clipper/clipper_unminified'
     },
     shim: {
         // See require.js docs for how to define dependencies that
         // should be loaded before your script/widget.
+        ThreeTextGeometry: ['Three'],
+        ThreeFontUtils: ['Three', 'ThreeTextGeometry'],
+        ThreeHelvetiker: ['Three', 'ThreeTextGeometry', 'ThreeFontUtils'],
     }
 });
 
@@ -83,7 +91,43 @@ cprequire_test(["inline:com-chilipeppr-widget-stlViewer"], function(myWidget) {
 
     console.log("test running of " + myWidget.id);
 
+    $('#com-chilipeppr-widget-stlViewer').css('position', 'relative');
+    $('#com-chilipeppr-widget-stlViewer').css('background', 'none');
+    $('#com-chilipeppr-widget-stlViewer').css('width', '300px');
+
+    $('body').prepend('<div id="3dviewer"></div>');
+
     $('body').prepend('<div id="testDivForFlashMessageWidget"></div>');
+
+    chilipeppr.load("#3dviewer", "https://raw.githubusercontent.com/chilipeppr/widget-3dviewer/master/auto-generated-widget.html", function() {
+        cprequire(['inline:com-chilipeppr-widget-3dviewer'], function(threed) {
+            threed.init({
+                doMyOwnDragDrop: false
+            });
+            //$('#com-chilipeppr-widget-3dviewer .panel-heading').addClass('hidden');
+            //autolevel.addRegionTo3d();
+            //autolevel.loadFileFromLocalStorageKey('com-chilipeppr-widget-autolevel-recent8');
+            //autolevel.toggleShowMatrix();
+
+            // only init eagle widget once 3d is loaded
+            // set doMyOwnDragDrop
+            //ew.init(true);
+            myWidget.init();
+        });
+    });
+
+    $('body').prepend('<div id="test-drag-drop"></div>');
+    chilipeppr.load("#test-drag-drop", "http://fiddle.jshell.net/chilipeppr/Z9F6G/show/light/",
+
+        function() {
+            cprequire(
+                ["inline:com-chilipeppr-elem-dragdrop"],
+
+                function(dd) {
+                    dd.init();
+                    dd.bind("body", null);
+                });
+        });
 
     chilipeppr.load(
         "#testDivForFlashMessageWidget",
@@ -97,6 +141,18 @@ cprequire_test(["inline:com-chilipeppr-widget-stlViewer"], function(myWidget) {
         }
     );
 
+    //$('body').append('<div id="com-chilipeppr-flash"></div>');
+    chilipeppr.load("#com-chilipeppr-flash",
+        "http://fiddle.jshell.net/chilipeppr/90698kax/show/light/",
+
+        function() {
+            console.log("mycallback got called after loading flash msg module");
+            cprequire(["inline:com-chilipeppr-elem-flashmsg"], function(fm) {
+                //console.log("inside require of " + fm.id);
+                fm.init();
+            });
+        });
+
     // init my widget
     myWidget.init();
     $('#' + myWidget.id).css('margin', '10px');
@@ -105,7 +161,7 @@ cprequire_test(["inline:com-chilipeppr-widget-stlViewer"], function(myWidget) {
 } /*end_test*/ );
 
 // This is the main definition of your widget. Give it a unique name.
-cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", /* other dependencies here */ ], function() {
+cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper", "jqueryuiWidget"], function() {
     return {
         /**
          * The ID of the widget. You must define this and make it unique.
@@ -113,10 +169,10 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", /* other
         id: "com-chilipeppr-widget-stlViewer", // Make the id the same as the cpdefine id
         name: "Widget / stlViewer", // The descriptive name of your widget.
         desc: "This example widget gives you a framework for creating your own widget. Please change this description once you fork this template and create your own widget. Make sure to run runme.js every time you are done editing your code so you can regenerate your README.md file, regenerate your auto-generated-widget.html, and automatically push your changes to Github.", // A description of what your widget does
-        url: "http://raw.githubusercontent.com/raykholo/widget-stlViewer/master/auto-generated-widget.html",       // The final URL of the working widget as a single HTML file with CSS and Javascript inlined. You can let runme.js auto fill this if you are using Cloud9.
+        url: "http://raw.githubusercontent.com/raykholo/widget-stlViewer/master/auto-generated-widget.html", // The final URL of the working widget as a single HTML file with CSS and Javascript inlined. You can let runme.js auto fill this if you are using Cloud9.
         fiddleurl: "http://ide.c9.io/raykholo/widget-stlviewer", // The edit URL. This can be auto-filled by runme.js in Cloud9 if you'd like, or just define it on your own to help people know where they can edit/fork your widget
         githuburl: "http://github.com/raykholo/widget-stlViewer", // The backing github repo
-        testurl: "http://widget-stlviewer-raykholo.c9users.io/widget.html",   // The standalone working widget so can view it working by itself
+        testurl: "http://widget-stlviewer-raykholo.c9users.io/widget.html", // The standalone working widget so can view it working by itself
         /**
          * Define pubsub signals below. These are basically ChiliPeppr's event system.
          * ChiliPeppr uses amplify.js's pubsub system so please refer to docs at
@@ -168,8 +224,23 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", /* other
             this.btnSetup();
             this.forkSetup();
 
+            this.init3d();
+
+            //this.testCube();
+
             console.log("I am done being initted.");
         },
+
+        testCube: function() {
+            var geometry = new THREE.BoxGeometry(10, 10, 10);
+            var material = new THREE.MeshBasicMaterial({
+                color: 0x00ff00
+            });
+            var cube = new THREE.Mesh(geometry, material);
+            cube.position.set (10, 10, 5);
+            this.sceneAdd(cube);
+        },
+
         /**
          * Call this method from init to setup all the buttons when this widget
          * is first loaded. This basically attaches click events to your 
@@ -371,6 +442,140 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", /* other
             });
 
         },
+        //init3d functions
+        clear3dViewer: function() {
+            console.log("clearing 3d viewer");
+            chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneclear");
+            //if (this.obj3d) this.obj3d.children = [];            
+            /*
+            this.obj3d.children.forEach(function(obj3d) {
+                chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneremove", obj3d);
+            });
+            */
+            this.is3dViewerReady = true;
+        },
+
+        init3d: function() {
+            this.get3dObj();
+            if (this.obj3d == null) {
+                console.log("loading 3d scene failed, try again in 1 second");
+                var attempts = 1;
+                var that = this;
+                setTimeout(function() {
+                    that.get3dObj();
+                    if (that.obj3d == null) {
+                        attempts++;
+                        setTimeout(function() {
+                            that.get3dObj();
+                            if (that.obj3d == null) {
+                                console.log("giving up on trying to get 3d");
+                            }
+                            else {
+                                console.log("succeeded on getting 3d after attempts:", attempts);
+                                that.onInit3dSuccess();
+                            }
+                        }, 5000);
+                    }
+                    else {
+                        console.log("succeeded on getting 3d after attempts:", attempts);
+                        that.onInit3dSuccess();
+                    }
+                }, 1000);
+            }
+            else {
+                this.onInit3dSuccess();
+            }
+
+        },
+        onInit3dSuccess: function() {
+            console.log("onInit3dSuccess. That means we finally got an object back.");
+            this.clear3dViewer();
+
+            // open the last file
+            var that = this;
+            //setTimeout(function () {
+            //that.open();
+            this.testCube();
+            //}, 1000);
+        },
+        obj3d: null, // gets the 3dviewer obj stored in here on callback
+        obj3dmeta: null, // gets metadata for 3dviewer
+        userCallbackForGet3dObj: null,
+        get3dObj: function (callback) {
+            this.userCallbackForGet3dObj = callback;
+            chilipeppr.subscribe("/com-chilipeppr-widget-3dviewer/recv3dObject", this, this.get3dObjCallback);
+            chilipeppr.publish("/com-chilipeppr-widget-3dviewer/request3dObject", "");
+            chilipeppr.unsubscribe("/com-chilipeppr-widget-3dviewer/recv3dObject", this.get3dObjCallback);
+        },
+        get3dObjCallback: function (data, meta) {
+            console.log("got 3d obj:", data, meta);
+            this.obj3d = data;
+            this.obj3dmeta = meta;
+            if (this.userCallbackForGet3dObj) {
+                //setTimeout(this.userCallbackForGet3dObj.bind(this), 200);
+                //console.log("going to call callback after getting back the new 3dobj. this.userCallbackForGet3dObj:", this.userCallbackForGet3dObj);
+                this.userCallbackForGet3dObj();
+                this.userCallbackForGet3dObj = null;
+            }
+        },
+        is3dViewerReady: false,
+        clear3dViewer: function () {
+            console.log("clearing 3d viewer");
+            chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneclear");
+            //if (this.obj3d) this.obj3d.children = [];            
+            /*
+            this.obj3d.children.forEach(function(obj3d) {
+                chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneremove", obj3d);
+            });
+            */
+            this.is3dViewerReady = true;
+        },
+        //end init3d functions
+
+        //sceneAdd functions
+        mySceneGroup: null,
+        sceneReAddMySceneGroup: function() {
+            if (this.obj3d && this.mySceneGroup) {
+                this.obj3d.add(this.mySceneGroup);
+            }
+            this.obj3dmeta.widget.wakeAnimate();
+        },
+        sceneRemoveMySceneGroup: function() {
+            if (this.obj3d && this.mySceneGroup) {
+                this.obj3d.remove(this.mySceneGroup);
+            }
+            this.obj3dmeta.widget.wakeAnimate();
+        },
+        sceneAdd: function(obj) {
+            console.log("InsideScene Add :", obj);
+            chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneadd", obj);
+            //chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneadd", obj);
+
+            // this method of adding puts us in the object that contains rendered Gcode
+            // that's one option, but when we send gcode to workspace we get overwritten
+            // then
+            //this.obj3d.add(obj);
+
+            // let's add our Eagle BRD content outside the scope of the Gcode content
+            // // so that we have it stay while the Gcode 3D Viewer still functions
+            //if (this.mySceneGroup == null) {
+            //   this.mySceneGroup = new THREE.Group();
+            //   this.obj3d.add(this.mySceneGroup);
+            //    }
+            //  this.mySceneGroup.add(obj);
+            //this.obj3dmeta.scene.add(obj);
+
+            this.obj3dmeta.widget.wakeAnimate();
+        },
+        sceneRemove: function(obj) {
+            //chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneremove", obj);
+            //this.obj3d.remove(obj);
+            //this.obj3dmeta.scene.remove(obj);
+            if (this.mySceneGroup != null)
+                this.mySceneGroup.remove(obj);
+            this.obj3dmeta.widget.wakeAnimate();
+        },
+        //end sceneAdd functions. 
 
     }
 });
