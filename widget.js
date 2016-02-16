@@ -86,7 +86,7 @@ cprequire_test(["inline:com-chilipeppr-widget-stlViewer"], function(myWidget) {
     });
 
     $('body').prepend('<div id="test-drag-drop"></div>');
-    chilipeppr.load("#test-drag-drop", "http://fiddle.jshell.net/chilipeppr/Z9F6G/show/light/",
+    chilipeppr.load("#test-drag-drop", "http://raw.githubusercontent.com/raykholo/elem-dragdrop/master/auto-generated-widget.html",
 
         function() {
             cprequire(
@@ -181,6 +181,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             // Define a key:value pair here as strings to document what signals you subscribe to
             // that are owned by foreign/other widgets.
             // '/com-chilipeppr-elem-dragdrop/ondropped': 'Example: We subscribe to this signal at a higher priority to intercept the signal. We do not let it propagate by returning false.'
+            '/com-chilipeppr-elem-dragdrop/ondroppedSTL': 'We subscribe to this signal at a higher priority to intercept the signal, double check if it is an Eagle Brd file and if so, we do not let it propagate by returning false. That way the 3D Viewer, Gcode widget, or other widgets will not get Eagle Brd file drag/drop events because they will not know how to interpret them.'
         },
         /**
          * All widgets should have an init method. It should be run by the
@@ -192,7 +193,9 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             this.setupUiFromLocalStorage();
             this.btnSetup();
             this.forkSetup();
-
+            
+            this.setupDragDrop();
+            
             this.init3d();
 
             //this.testCube();
@@ -411,6 +414,22 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             });
 
         },
+        //dragdrop setup
+        setupDragDrop: function () {
+            // subscribe to events
+            
+            //chilipeppr.subscribe("/com-chilipeppr-elem-dragdrop/ondragover", this, this.onDragOver);
+            //chilipeppr.subscribe("/com-chilipeppr-elem-dragdrop/ondragleave", this, this.onDragLeave);
+            
+            // /com-chilipeppr-elem-dragdrop/ondropped
+            chilipeppr.subscribe("/com-chilipeppr-elem-dragdrop/ondroppedSTL", this, this.onDroppedSTL, 9); // default is 10, we do 9 to be higher priority
+        },
+        onDroppedSTL: function (data) {
+            console.log ("STL Dropped:  ", data);
+            
+            
+        },
+        //end dragdrop setup
         //init3d functions
         clear3dViewer: function() {
             console.log("clearing 3d viewer");
@@ -545,6 +564,169 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             this.obj3dmeta.widget.wakeAnimate();
         },
         //end sceneAdd functions. 
+        
+        //start stl parsing functions
+        parseStl: function(data) {
+            var FACE_VERTICES = 3;
+
+            var HEADER_BYTES = 80;
+            var FACE_COUNT_BYTES = 4;
+            var FACE_NORMAL_BYTES = 12;
+            var VERTEX_BYTES = 12;
+            var ATTRIB_BYTE_COUNT_BYTES = 2;
+
+            var mesh = new THREE.Mesh;
+            mesh.vertexBuffer = [];
+            mesh.indexBuffer = [];
+            mesh.faceNormalBuffer = [];
+
+            var isBinary = false;
+            var reader = new JSC3D.BinaryStream(data);
+
+            // Detect whether this is an ASCII STL stream or a binary STL stream by checking a snippet of contents.
+            reader.skip(HEADER_BYTES + FACE_COUNT_BYTES);
+            for (var i = 0; i < 256 && !reader.eof(); i++) {
+                if (reader.readUInt8() > 0x7f) {
+                    isBinary = true;
+                    break;
+                }
+            }
+
+                console.log('This is recognised as ' + (isBinary ? 'a binary' : 'an ASCII') + ' STL file.');
+
+            if (!isBinary) {
+                /*
+                 * This should be an ASCII STL file.
+                 * By Triffid Hunter <triffid.hunter@gmail.com>.
+                 */
+
+                var facePattern = 'facet\\s+normal\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+' +
+                    'outer\\s+loop\\s+' +
+                    'vertex\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+' +
+                    'vertex\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+' +
+                    'vertex\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+' +
+                    'endloop\\s+' +
+                    'endfacet';
+                var faceRegExp = new RegExp(facePattern, 'ig');
+                var matches = data.match(faceRegExp);
+
+                if (matches) {
+                    var numOfFaces = matches.length;
+
+                    mesh.faceCount = numOfFaces;
+                    var v2i = {};
+
+                    // reset regexp for vertex extraction
+                    faceRegExp.lastIndex = 0;
+                    faceRegExp.global = false;
+
+                    // read faces
+                    for (var r = faceRegExp.exec(data); r != null; r = faceRegExp.exec(data)) {
+                        mesh.faceNormalBuffer.push(parseFloat(r[1]), parseFloat(r[2]), parseFloat(r[3]));
+
+                        for (var i = 0; i < FACE_VERTICES; i++) {
+                            var x = parseFloat(r[4 + (i * 3)]);
+                            var y = parseFloat(r[5 + (i * 3)]);
+                            var z = parseFloat(r[6 + (i * 3)]);
+
+                            // weld vertices by the given decimal precision
+                            var vertKey = x.toFixed(this.decimalPrecision) + '-' + y.toFixed(this.decimalPrecision) + '-' + z.toFixed(this.decimalPrecision);
+                            var vi = v2i[vertKey];
+                            if (vi === undefined) {
+                                vi = mesh.vertexBuffer.length / 3;
+                                v2i[vertKey] = vi;
+                                mesh.vertexBuffer.push(x);
+                                mesh.vertexBuffer.push(y);
+                                mesh.vertexBuffer.push(z);
+                            }
+                            mesh.indexBuffer.push(vi);
+                        }
+
+                        // mark the end of the indices of a face
+                        mesh.indexBuffer.push(-1);
+                    }
+                }
+            }
+            else {
+                /*
+                 * This is a binary STL file.
+                 */
+
+                reader.reset();
+
+                // skip 80-byte's STL file header
+                reader.skip(HEADER_BYTES);
+
+                // read face count
+                var numOfFaces = reader.readUInt32();
+
+                // calculate the expected length of the stream
+                var expectedLen = HEADER_BYTES + FACE_COUNT_BYTES +
+                    (FACE_NORMAL_BYTES + VERTEX_BYTES * FACE_VERTICES + ATTRIB_BYTE_COUNT_BYTES) * numOfFaces;
+
+                // is file complete?
+                if (reader.size() < expectedLen) {
+                        console.log('Failed to parse contents of the file. It seems not complete.');
+                    return;
+                }
+
+                mesh.faceCount = numOfFaces;
+                var v2i = {};
+
+                // read faces
+                for (var i = 0; i < numOfFaces; i++) {
+                    // read normal vector of a face
+                    mesh.faceNormalBuffer.push(reader.readFloat32());
+                    mesh.faceNormalBuffer.push(reader.readFloat32());
+                    mesh.faceNormalBuffer.push(reader.readFloat32());
+
+                    // read all 3 vertices of a face
+                    for (var j = 0; j < FACE_VERTICES; j++) {
+                        // read coords of a vertex
+                        var x, y, z;
+                        x = reader.readFloat32();
+                        y = reader.readFloat32();
+                        z = reader.readFloat32();
+
+                        // weld vertices by the given decimal precision
+                        var vertKey = x.toFixed(this.decimalPrecision) + '-' + y.toFixed(this.decimalPrecision) + '-' + z.toFixed(this.decimalPrecision);
+                        var vi = v2i[vertKey];
+                        if (vi != undefined) {
+                            mesh.indexBuffer.push(vi);
+                        }
+                        else {
+                            vi = mesh.vertexBuffer.length / 3;
+                            v2i[vertKey] = vi;
+                            mesh.vertexBuffer.push(x);
+                            mesh.vertexBuffer.push(y);
+                            mesh.vertexBuffer.push(z);
+                            mesh.indexBuffer.push(vi);
+                        }
+                    }
+
+                    // mark the end of the indices of a face
+                    mesh.indexBuffer.push(-1);
+
+                    // skip 2-bytes' 'attribute byte count' field, since we do not deal with any additional attribs
+                    reader.skip(ATTRIB_BYTE_COUNT_BYTES);
+                }
+            }
+
+            // add mesh to scene
+            if (!mesh.isTrivial()) {
+                // Some tools (Blender etc.) export STLs with empty face normals (all equal to 0). In this case we ...
+                // ... simply set the face normal buffer to null so that they will be calculated in mesh's init stage. 
+                if (Math.abs(mesh.faceNormalBuffer[0]) < 1e-6 &&
+                    Math.abs(mesh.faceNormalBuffer[1]) < 1e-6 &&
+                    Math.abs(mesh.faceNormalBuffer[2]) < 1e-6) {
+                    mesh.faceNormalBuffer = null;
+                }
+
+                // scene.addChild(mesh);
+                this.sceneAdd(mesh);
+            }
+        },
+        //end stl parsing functions
 
     }
 });
