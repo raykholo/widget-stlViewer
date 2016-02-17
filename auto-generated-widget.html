@@ -24,7 +24,9 @@
     padding: 2px 6px;
 }
 
-
+#com-chilipeppr-widget-stlViewer.hover {
+    background-color: #428bca;
+}
     </style>
 
     <script type='text/javascript'>
@@ -63,6 +65,7 @@ requirejs.config({
         ThreeFontUtils: '//i2dcui.appspot.com/js/three/FontUtils',
         ThreeHelvetiker: '//i2dcui.appspot.com/js/three/threehelvetiker',
         Clipper: '//i2dcui.appspot.com/js/clipper/clipper_unminified'
+            //JSC3D: "//raw.githubusercontent.com/raykholo/widget-stlViewer/master/JSC3D"
     },
     shim: {
         // See require.js docs for how to define dependencies that
@@ -70,6 +73,7 @@ requirejs.config({
         ThreeTextGeometry: ['Three'],
         ThreeFontUtils: ['Three', 'ThreeTextGeometry'],
         ThreeHelvetiker: ['Three', 'ThreeTextGeometry', 'ThreeFontUtils'],
+        //JSC3D: ['Three', 'ThreeTextGeometry', 'ThreeFontUtils', 'ThreeHelvetiker'],
     }
 });
 
@@ -115,7 +119,7 @@ cprequire_test(["inline:com-chilipeppr-widget-stlViewer"], function(myWidget) {
             myWidget.init();
         });
     });
-
+    /*
     $('body').prepend('<div id="test-drag-drop"></div>');
     chilipeppr.load("#test-drag-drop", "http://raw.githubusercontent.com/raykholo/elem-dragdrop/master/auto-generated-widget.html",
 
@@ -128,6 +132,7 @@ cprequire_test(["inline:com-chilipeppr-widget-stlViewer"], function(myWidget) {
                     dd.bind("body", null);
                 });
         });
+        */
 
     chilipeppr.load(
         "#testDivForFlashMessageWidget",
@@ -157,6 +162,8 @@ cprequire_test(["inline:com-chilipeppr-widget-stlViewer"], function(myWidget) {
     myWidget.init();
     $('#' + myWidget.id).css('margin', '10px');
     $('title').html(myWidget.name);
+
+    myWidget.bind("body", null);
 
 } /*end_test*/ );
 
@@ -224,9 +231,12 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             this.setupUiFromLocalStorage();
             this.btnSetup();
             this.forkSetup();
-            
+
+            //$('#com-chilipeppr-widget-stlViewer').click(this.loadChiliPepprGcode.bind(this));
+
+
             this.setupDragDrop();
-            
+
             this.init3d();
 
             //this.testCube();
@@ -240,8 +250,12 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 color: 0x00ff00
             });
             var cube = new THREE.Mesh(geometry, material);
-            cube.position.set (10, 10, 5);
+            cube.position.set(10, 10, 5);
+
+            var edges = new THREE.EdgesHelper(cube, 0x000000);
+
             this.sceneAdd(cube);
+            this.sceneAdd (edges);
         },
 
         /**
@@ -446,19 +460,33 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
         },
         //dragdrop setup
-        setupDragDrop: function () {
+        setupDragDrop: function() {
             // subscribe to events
-            
+
             //chilipeppr.subscribe("/com-chilipeppr-elem-dragdrop/ondragover", this, this.onDragOver);
             //chilipeppr.subscribe("/com-chilipeppr-elem-dragdrop/ondragleave", this, this.onDragLeave);
-            
+
             // /com-chilipeppr-elem-dragdrop/ondropped
             chilipeppr.subscribe("/com-chilipeppr-elem-dragdrop/ondroppedSTL", this, this.onDroppedSTL, 9); // default is 10, we do 9 to be higher priority
         },
-        onDroppedSTL: function (data) {
-            console.log ("STL Dropped:  ", data);
-            
-            
+        onDroppedSTL: function(data) {
+            console.log("STL Dropped:  ", data);
+
+            //var reader = new FileReader();
+
+            // reader.readAsArrayBuffer (data);
+            //reader.readAsText (data);
+
+            var arrayBuffer;
+            var fileReader = new FileReader();
+            fileReader.onload = function() {
+                arrayBuffer = this.result;
+            };
+            fileReader.readAsArrayBuffer(data);
+
+
+            console.log("result:  ", fileReader.result);
+            //this.parseStlBinary(reader.result);
         },
         //end dragdrop setup
         //init3d functions
@@ -520,13 +548,13 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
         obj3d: null, // gets the 3dviewer obj stored in here on callback
         obj3dmeta: null, // gets metadata for 3dviewer
         userCallbackForGet3dObj: null,
-        get3dObj: function (callback) {
+        get3dObj: function(callback) {
             this.userCallbackForGet3dObj = callback;
             chilipeppr.subscribe("/com-chilipeppr-widget-3dviewer/recv3dObject", this, this.get3dObjCallback);
             chilipeppr.publish("/com-chilipeppr-widget-3dviewer/request3dObject", "");
             chilipeppr.unsubscribe("/com-chilipeppr-widget-3dviewer/recv3dObject", this.get3dObjCallback);
         },
-        get3dObjCallback: function (data, meta) {
+        get3dObjCallback: function(data, meta) {
             console.log("got 3d obj:", data, meta);
             this.obj3d = data;
             this.obj3dmeta = meta;
@@ -538,7 +566,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             }
         },
         is3dViewerReady: false,
-        clear3dViewer: function () {
+        clear3dViewer: function() {
             console.log("clearing 3d viewer");
             chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneclear");
             //if (this.obj3d) this.obj3d.children = [];            
@@ -595,169 +623,235 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             this.obj3dmeta.widget.wakeAnimate();
         },
         //end sceneAdd functions. 
-        
-        //start stl parsing functions
-        parseStl: function(data) {
-            var FACE_VERTICES = 3;
 
-            var HEADER_BYTES = 80;
-            var FACE_COUNT_BYTES = 4;
-            var FACE_NORMAL_BYTES = 12;
-            var VERTEX_BYTES = 12;
-            var ATTRIB_BYTE_COUNT_BYTES = 2;
+        //begin self dragdrop functions
+        bind: function(dropDomElemSelector, txtDomElemSelector) {
+            
+            var that = this;
+            
+            // Create drag and drop
+            //dropArea = $('.dropArea');
+            this.dropArea = $(dropDomElemSelector);
+            this.txtDomElemSelector = $(txtDomElemSelector);
 
-            var mesh = new THREE.Mesh;
-            mesh.vertexBuffer = [];
-            mesh.indexBuffer = [];
-            mesh.faceNormalBuffer = [];
+            // Attach our drag and drop handlers.
+            this.dropArea.bind({
+                dragover: function() {
+                    $(this).addClass('hover');
+                    $(".com-chilipeppr-elem-dragdrop").addClass('hover');
+                    //$(".com-chilipeppr-elem-dragdrop").popover('show');
+                    //chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondragover", "");
+                    return false;
+                },
+                dragend: function() {
+                    $(this).removeClass('hover');
+                    $(".com-chilipeppr-elem-dragdrop").removeClass('hover');
+                    //$(".com-chilipeppr-elem-dragdrop").popover('hide');
+                    //chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondragleave", "");
+                    return false;
+                },
+                dragleave: function() {
+                    $(this).removeClass('hover');
+                    $(".com-chilipeppr-elem-dragdrop").removeClass('hover');
+                    //$(".com-chilipeppr-elem-dragdrop").popover('hide');
+                    //chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondragleave", "");
 
-            var isBinary = false;
-            var reader = new JSC3D.BinaryStream(data);
+                    return false;
+                },
+                drop: function(e) {
+                    $(this).removeClass('hover');
+                    $(".com-chilipeppr-elem-dragdrop").removeClass('hover');
+                    //$(".com-chilipeppr-elem-dragdrop").popover('hide');
+                    //chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondragleave", "");
 
-            // Detect whether this is an ASCII STL stream or a binary STL stream by checking a snippet of contents.
-            reader.skip(HEADER_BYTES + FACE_COUNT_BYTES);
-            for (var i = 0; i < 256 && !reader.eof(); i++) {
-                if (reader.readUInt8() > 0x7f) {
-                    isBinary = true;
-                    break;
-                }
-            }
+                    e = e || window.event;
+                    e.preventDefault();
+                    
+                    
+                    
+                    // jQuery wraps the originalEvent, so we try to detect that here...
+                    e = e.originalEvent || e;
+                    //console.log(e);
 
-                console.log('This is recognised as ' + (isBinary ? 'a binary' : 'an ASCII') + ' STL file.');
+                    // Using e.files with fallback because e.dataTransfer is immutable and can't be overridden in Polyfills (http://sandbox.knarly.com/js/dropfiles/).            
+                    var files = (e.files || e.dataTransfer.files);
+                    //console.log(files);
+                    for (var i = 0; i < files.length; i++) {
+                        (function(i) {
+                            // Loop through our files with a closure so each of our FileReader's are isolated.
+                            var reader = new FileReader();
+                            //console.log(reader);
+                            //console.log("file");
+                            //console.log(files[i]);
+                            var thefile = files[i];
+                            reader.onload = function(event) {
+                                //console.log(event);
+                                //console.log(event.target.result);
+                                //console.log(event.target.result);
+                                $(this.txtDomElemSelector).html(event.target.result);
 
-            if (!isBinary) {
-                /*
-                 * This should be an ASCII STL file.
-                 * By Triffid Hunter <triffid.hunter@gmail.com>.
-                 */
+                                // publish event to pubsub
+                                var info = {
+                                    name: thefile.name,
+                                    lastModified: thefile.lastModifiedDate
+                                };
+                                console.log("self drag/drop got a drop. file.length:", event.target.result.length, "info:", info);
+                                /*
+                                chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondropped", event.target.result, info);
+                                chilipeppr.publish(
+                                    "/com-chilipeppr-elem-flashmsg/flashmsg", "File Loaded",
+                                    '<div class="row">' +
+                                    '<div class="col-xs-3">' +
+                                    "Name: " +
+                                    '</div><div class="col-xs-9">' +
+                                    thefile.name +
+                                    '</div>' +
+                                    '</div><div class="row">' +
+                                    '<div class="col-xs-3">' +
+                                    "Size: " +
+                                    '</div><div class="col-xs-9">' +
+                                    thefile.size +
+                                    '</div>' +
+                                    '</div><div class="row">' +
+                                    '<div class="col-xs-3">' +
+                                    "Last Modified: " +
+                                    '</div><div class="col-xs-9">' +
+                                    thefile.lastModifiedDate +
+                                    '</div>' +
+                                    '</div>' +
+                                    "</div>", 1000 * 3, true);*/
+                            };
+                            //reader.readAsDataURL(files[i]);
 
-                var facePattern = 'facet\\s+normal\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+' +
-                    'outer\\s+loop\\s+' +
-                    'vertex\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+' +
-                    'vertex\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+' +
-                    'vertex\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+([-+]?\\b(?:[0-9]*\\.)?[0-9]+(?:[eE][-+]?[0-9]+)?\\b)\\s+' +
-                    'endloop\\s+' +
-                    'endfacet';
-                var faceRegExp = new RegExp(facePattern, 'ig');
-                var matches = data.match(faceRegExp);
+                            // var fileExtension = files[i].name.split();
+                            var fileExtension = files[i].name.substr(files[i].name.lastIndexOf('.') + 1);
 
-                if (matches) {
-                    var numOfFaces = matches.length;
+                            console.log("Before File Reader. Extension:  ", fileExtension);
 
-                    mesh.faceCount = numOfFaces;
-                    var v2i = {};
-
-                    // reset regexp for vertex extraction
-                    faceRegExp.lastIndex = 0;
-                    faceRegExp.global = false;
-
-                    // read faces
-                    for (var r = faceRegExp.exec(data); r != null; r = faceRegExp.exec(data)) {
-                        mesh.faceNormalBuffer.push(parseFloat(r[1]), parseFloat(r[2]), parseFloat(r[3]));
-
-                        for (var i = 0; i < FACE_VERTICES; i++) {
-                            var x = parseFloat(r[4 + (i * 3)]);
-                            var y = parseFloat(r[5 + (i * 3)]);
-                            var z = parseFloat(r[6 + (i * 3)]);
-
-                            // weld vertices by the given decimal precision
-                            var vertKey = x.toFixed(this.decimalPrecision) + '-' + y.toFixed(this.decimalPrecision) + '-' + z.toFixed(this.decimalPrecision);
-                            var vi = v2i[vertKey];
-                            if (vi === undefined) {
-                                vi = mesh.vertexBuffer.length / 3;
-                                v2i[vertKey] = vi;
-                                mesh.vertexBuffer.push(x);
-                                mesh.vertexBuffer.push(y);
-                                mesh.vertexBuffer.push(z);
+                            if (fileExtension.match(/stl/g)) {
+                                console.log("We have an STL file.  Read as Array Buffer");
+                                 reader.readAsArrayBuffer(files[i]);
+                                //chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondroppedSTL", files[i]);
+                                
+                                //that.parseStlBinary (files[i] );
+                                
+                                console.log ("files[i]:  ", files[i] );
+                                
+                                console.log ("result ",  reader.result);
+                                
+                                var convertedBuffer = (that.arrayBufferToString (reader.result) );
+                                
+                                console.log ("convertedBuffer ",  convertedBuffer);
+                                
+                                
                             }
-                            mesh.indexBuffer.push(vi);
-                        }
+                            else {
+                                reader.readAsText(files[i]);
+                            }
 
-                        // mark the end of the indices of a face
-                        mesh.indexBuffer.push(-1);
+                        })(i);
                     }
+
+                    return false;
                 }
+            });
+            // end drop area code
+        },
+        //end self dragdrop functions
+        
+
+        //end reader functions
+
+
+
+        arrayBufferToString: function(buffer, onSuccess, onFail) {
+            var bufView = new Uint8Array(buffer);
+            var length = bufView.length;
+            var result = '';
+            for (var i = 0; i < length; i += 65535) {
+                var addition = 65535;
+                if (i + 65535 > length) {
+                    addition = length - i;
+                }
+                result += String.fromCharCode.apply(null, bufView.subarray(i, i + addition));
+            }
+            if (result) {
+                if (onSuccess)
+                    onSuccess(result);
             }
             else {
-                /*
-                 * This is a binary STL file.
-                 */
-
-                reader.reset();
-
-                // skip 80-byte's STL file header
-                reader.skip(HEADER_BYTES);
-
-                // read face count
-                var numOfFaces = reader.readUInt32();
-
-                // calculate the expected length of the stream
-                var expectedLen = HEADER_BYTES + FACE_COUNT_BYTES +
-                    (FACE_NORMAL_BYTES + VERTEX_BYTES * FACE_VERTICES + ATTRIB_BYTE_COUNT_BYTES) * numOfFaces;
-
-                // is file complete?
-                if (reader.size() < expectedLen) {
-                        console.log('Failed to parse contents of the file. It seems not complete.');
-                    return;
-                }
-
-                mesh.faceCount = numOfFaces;
-                var v2i = {};
-
-                // read faces
-                for (var i = 0; i < numOfFaces; i++) {
-                    // read normal vector of a face
-                    mesh.faceNormalBuffer.push(reader.readFloat32());
-                    mesh.faceNormalBuffer.push(reader.readFloat32());
-                    mesh.faceNormalBuffer.push(reader.readFloat32());
-
-                    // read all 3 vertices of a face
-                    for (var j = 0; j < FACE_VERTICES; j++) {
-                        // read coords of a vertex
-                        var x, y, z;
-                        x = reader.readFloat32();
-                        y = reader.readFloat32();
-                        z = reader.readFloat32();
-
-                        // weld vertices by the given decimal precision
-                        var vertKey = x.toFixed(this.decimalPrecision) + '-' + y.toFixed(this.decimalPrecision) + '-' + z.toFixed(this.decimalPrecision);
-                        var vi = v2i[vertKey];
-                        if (vi != undefined) {
-                            mesh.indexBuffer.push(vi);
-                        }
-                        else {
-                            vi = mesh.vertexBuffer.length / 3;
-                            v2i[vertKey] = vi;
-                            mesh.vertexBuffer.push(x);
-                            mesh.vertexBuffer.push(y);
-                            mesh.vertexBuffer.push(z);
-                            mesh.indexBuffer.push(vi);
-                        }
-                    }
-
-                    // mark the end of the indices of a face
-                    mesh.indexBuffer.push(-1);
-
-                    // skip 2-bytes' 'attribute byte count' field, since we do not deal with any additional attribs
-                    reader.skip(ATTRIB_BYTE_COUNT_BYTES);
-                }
+                if (onFail)
+                    onFail('buffer was invalid');
             }
 
-            // add mesh to scene
-            if (!mesh.isTrivial()) {
-                // Some tools (Blender etc.) export STLs with empty face normals (all equal to 0). In this case we ...
-                // ... simply set the face normal buffer to null so that they will be calculated in mesh's init stage. 
-                if (Math.abs(mesh.faceNormalBuffer[0]) < 1e-6 &&
-                    Math.abs(mesh.faceNormalBuffer[1]) < 1e-6 &&
-                    Math.abs(mesh.faceNormalBuffer[2]) < 1e-6) {
-                    mesh.faceNormalBuffer = null;
+            return result;
+
+        },
+        
+        //start stl parsing functions
+        parseStlBinary: function(stl) {
+            var geo = new THREE.Geometry();
+            var dv = new DataView(stl, 80); // 80 == unused header
+            var isLittleEndian = true;
+            var triangles = dv.getUint32(0, isLittleEndian);
+
+            // console.log('arraybuffer length:  ' + stl.byteLength);
+            // console.log('number of triangles: ' + triangles);
+
+            var offset = 4;
+            for (var i = 0; i < triangles; i++) {
+                // Get the normal for this triangle
+                var normal = new THREE.Vector3(
+                    dv.getFloat32(offset, isLittleEndian),
+                    dv.getFloat32(offset + 4, isLittleEndian),
+                    dv.getFloat32(offset + 8, isLittleEndian)
+                );
+                offset += 12;
+
+                // Get all 3 vertices for this triangle
+                for (var j = 0; j < 3; j++) {
+                    geo.vertices.push(
+                        new THREE.Vector3(
+                            dv.getFloat32(offset, isLittleEndian),
+                            dv.getFloat32(offset + 4, isLittleEndian),
+                            dv.getFloat32(offset + 8, isLittleEndian)
+                        )
+                    );
+                    offset += 12
                 }
 
-                // scene.addChild(mesh);
-                this.sceneAdd(mesh);
+                // there's also a Uint16 "attribute byte count" that we
+                // don't need, it should always be zero.
+                offset += 2;
+
+                // Create a new face for from the vertices and the normal             
+                geo.faces.push(new THREE.Face3(i * 3, i * 3 + 1, i * 3 + 2, normal));
             }
+
+            // The binary STL I'm testing with seems to have all
+            // zeroes for the normals, unlike its ASCII counterpart.
+            // We can use three.js to compute the normals for us, though,
+            // once we've assembled our geometry. This is a relatively 
+            // expensive operation, but only needs to be done once.
+            geo.computeFaceNormals();
+
+            var mesh = new THREE.Mesh(
+                geo,
+                // new THREE.MeshNormalMaterial({
+                //     overdraw:true
+                // }
+                new THREE.MeshLambertMaterial({
+                    overdraw: true,
+                    color: 0xaa0000,
+                    shading: THREE.FlatShading
+                }));
+            //scene.add(mesh);
+            this.sceneAdd(mesh);
+
+            stl = null;
         },
         //end stl parsing functions
+
 
     }
 });
