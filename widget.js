@@ -448,6 +448,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             var fileReader = new FileReader();
             fileReader.onload = function() {
                 arrayBuffer = this.result;
+                console.log('Raw filereader result:  ', this.result);
             };
             fileReader.readAsArrayBuffer(data);
 
@@ -652,6 +653,21 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                             //console.log(files[i]);
                             var thefile = files[i];
                             reader.onload = function(event) {
+                          
+                                
+                                var data = this.result
+                                console.log('Raw filereader result:  ', data);
+                                // Determine if we have Binary or ASCII STL
+                                
+                                console.log("Checking if this is Binary or ASCII STL");
+                                reader.seek(80);  // skip the header
+                                var count = reader.readUInt32();
+                                var predictedSize = 80 /* header */ + 4 /* count */ + 50 * count;
+                                var binary = reader.getSize() == predictedSize;  
+                                            
+                                console.log("Are we dealing with a Binary STL?  ", binary);
+                               
+                                
                                 //console.log(event);
                                 //console.log(event.target.result);
                                 //console.log(event.target.result);
@@ -697,18 +713,18 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
                             if (fileExtension.match(/stl/g)) {
                                 console.log("We have an STL file.  Read as Array Buffer");
-                                 reader.readAsArrayBuffer(files[i]);
+                                 reader.readAsBinaryString(files[i]);
                                 //chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondroppedSTL", files[i]);
                                 
                                 //that.parseStlBinary (files[i] );
                                 
                                 console.log ("files[i]:  ", files[i] );
                                 
-                                console.log ("result ",  reader.result);
+                                console.log ("result ",  this.result);
                                 
-                                var convertedBuffer = (that.arrayBufferToString (reader.result) );
+                                //var convertedBuffer = (that.arrayBufferToString (reader.result) );
                                 
-                                console.log ("convertedBuffer ",  convertedBuffer);
+                                //console.log ("convertedBuffer ",  convertedBuffer);
                                 
                                 
                             }
