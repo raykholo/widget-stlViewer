@@ -64,7 +64,8 @@ requirejs.config({
         ThreeTextGeometry: '//i2dcui.appspot.com/js/three/TextGeometry',
         ThreeFontUtils: '//i2dcui.appspot.com/js/three/FontUtils',
         ThreeHelvetiker: '//i2dcui.appspot.com/js/three/threehelvetiker',
-        Clipper: '//i2dcui.appspot.com/js/clipper/clipper_unminified'
+        Clipper: '//i2dcui.appspot.com/js/clipper/clipper_unminified',
+        BinaryReader: '//raw.githubusercontent.com/raykholo/widget-stlViewer/master/binaryReader'
             //JSC3D: "//raw.githubusercontent.com/raykholo/widget-stlViewer/master/JSC3D"
     },
     shim: {
@@ -168,7 +169,7 @@ cprequire_test(["inline:com-chilipeppr-widget-stlViewer"], function(myWidget) {
 } /*end_test*/ );
 
 // This is the main definition of your widget. Give it a unique name.
-cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper", "jqueryuiWidget"], function() {
+cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper", "jqueryuiWidget", "binaryReader"], function(cp, clipper, jqui, binaryR) {
     return {
         /**
          * The ID of the widget. You must define this and make it unique.
@@ -660,7 +661,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     return false;
                 },
                 
-                loadSTL: function(e) {
+                drop: function(e) {
                     var looksLikeBinary = function(reader) {
                         // STL files don't specify a way to distinguish ASCII from binary.
                         // The usual way is checking for "solid" at the start of the file --
@@ -674,6 +675,10 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                         var count = reader.readUInt32();
                                 
                         var predictedSize = 80 /* header */ + 4 /* count */ + 50 * count;
+                        
+                        console.log('Binary Count: ', predictedSize);
+                        console.log('Reader Count: ', reader.getSize())
+                        
                         return reader.getSize() == predictedSize;
                     };
                             
@@ -702,20 +707,50 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     //chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondragleave", "");
 
                     for (var i = 0; i < files.length; i++) {
-                        var reader = new BinaryReader(fileS[i]);
-
-                            if (looksLikeBinary(reader)) {
-                              this.loadSTLBinary(reader);
-                            } else {
-                              this.loadSTLString(file);
-                            }
+                        console.log('Checking STL ', i);                    
+                        (function(i) {
+                            // Loop through our files with a closure so each of our FileReader's are isolated.
+                            var reader = new FileReader();
+                            //console.log(reader);
+                            //console.log("file");
+                            //console.log(files[i]);
+                            //var thefile = files[i];
+                            reader.onload = function(event) {
+                  
                                       
-                    
-                        }    
+                                
+                            var data = this.result
+                            var binreader = new BinaryReader(data);
+
+                            if (looksLikeBinary(binreader)) {
+                              //this.loadSTLBinary(reader);
+                              console.log('Dealing with a Binary STL');
+                              // Do what you need to to parse a Binary on here, data, contains a Binary STL
+                              console.log(data);
+                            } else {
+                              //this.loadSTLString(file);
+                              console.log('Dealing with an ASCII STL');
+                              // Do what you need to to parse an ASCII on here, data, contains a ASCII STL
+                              console.log(data);
+                            }
+                        }
+                        
+                        
+                        // read the file in, pass it to the BinaryReader and check if its Binary or STL
+                        reader.readAsBinaryString(files[i])
+    
+                        
+                        
+                        })(i);
+                        
+                    }
+                        
+                        
+                        return false;
                     },
             
                     
-                drop: function(e) {
+                dropold: function(e) {
                     $(this).removeClass('hover');
                     $(".com-chilipeppr-elem-dragdrop").removeClass('hover');
                     //$(".com-chilipeppr-elem-dragdrop").popover('hide');
@@ -746,8 +781,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                                       
                                 
                                 var data = this.result
-                                loadSTL(data);
-                            //    console.log('Raw filereader result:  ', data);
+                            //  console.log('Raw filereader result:  ', data);
                             
                                 //console.log(event);
                                 //console.log(event.target.result);
@@ -786,7 +820,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                                     "</div>", 1000 * 3, true);*/
                             };
                             //reader.readAsDataURL(files[i]);
-
+            
                             // var fileExtension = files[i].name.split();
                             var fileExtension = files[i].name.substr(files[i].name.lastIndexOf('.') + 1);
 
