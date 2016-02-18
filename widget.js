@@ -32,7 +32,7 @@ requirejs.config({
         ThreeFontUtils: '//i2dcui.appspot.com/js/three/FontUtils',
         ThreeHelvetiker: '//i2dcui.appspot.com/js/three/threehelvetiker',
         Clipper: '//i2dcui.appspot.com/js/clipper/clipper_unminified',
-        STLLoader: '//raw.githubusercontent.com/raykholo/widget-stlViewer/master/stl'
+        STLLoader: '//i2dcui.appspot.com/geturl?url=https://raw.githubusercontent.com/raykholo/widget-stlViewer/master/stl.js'
             //JSC3D: "//raw.githubusercontent.com/raykholo/widget-stlViewer/master/JSC3D"
     },
     shim: {
