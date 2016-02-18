@@ -693,33 +693,9 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                               //this.loadSTLBinary(reader);
                               console.log('Dealing with a Binary STL');
                               // Do what you need to to parse a Binary on here, data, contains a Binary STL
-                              //that.parseStlBinary (binreader);
+                              that.parseStlBinary (binreader);
                               console.log ("binreader:  ", binreader);
                               console.log("data:  ", data);
-                              
-                              
-                              //start direct binarySTLReading
-                              var FACE_VERTICES = 3;
-                              
-                              var HEADER_BYTES = 80;
-                              var FACE_COUNT_BYTES = 4;
-                              var FACE_NORMAL_BYTES = 12;
-                              var VERTEX_BYTES = 12;
-                              var ATTRIB_BYTE_COUNT_BYTES = 2;
-                              
-                              var mesh = new THREE.Mesh;
-                              mesh.vertexBuffer = [];
-                              mesh.indexBuffer = [];
-                              mesh.faceNormalBuffer = [];
-                              reader.reset();
-                              
-                              // skip 80-byte's STL file header
-                              reader.skip(HEADER_BYTES);
-                              
-                              
-                              
-                              
-                              //end direct binarySTLReading
                               
                             } else {
                               //this.loadSTLString(file);
@@ -858,8 +834,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
         //end reader functions
 
-
-
+        /*
         arrayBufferToString: function(buffer, onSuccess, onFail) {
             var bufView = new Uint8Array(buffer);
             var length = bufView.length;
@@ -882,20 +857,69 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
             return result;
 
-        },
+        },*/
         
         //start stl parsing functions
-        parseBinaryStl: function (dataIn) {
-            var FACE_VERTICES = 3;
+        parseStlBinary: function(stl) { //this is from jsstl.  we have a failure on the new DataView
+            var geo = new THREE.Geometry();
+            var dv = new DataView(stl, 80); // 80 == unused header
+            var isLittleEndian = true;
+            var triangles = dv.getUint32(0, isLittleEndian);
 
-            var HEADER_BYTES = 80;
-            var FACE_COUNT_BYTES = 4;
-            var FACE_NORMAL_BYTES = 12;
-            var VERTEX_BYTES = 12;
-            var ATTRIB_BYTE_COUNT_BYTES = 2;
-            
-            
-            
+            // console.log('arraybuffer length:  ' + stl.byteLength);
+            // console.log('number of triangles: ' + triangles);
+
+            var offset = 4;
+            for (var i = 0; i < triangles; i++) {
+                // Get the normal for this triangle
+                var normal = new THREE.Vector3(
+                    dv.getFloat32(offset, isLittleEndian),
+                    dv.getFloat32(offset + 4, isLittleEndian),
+                    dv.getFloat32(offset + 8, isLittleEndian)
+                );
+                offset += 12;
+
+                // Get all 3 vertices for this triangle
+                for (var j = 0; j < 3; j++) {
+                    geo.vertices.push(
+                        new THREE.Vector3(
+                            dv.getFloat32(offset, isLittleEndian),
+                            dv.getFloat32(offset + 4, isLittleEndian),
+                            dv.getFloat32(offset + 8, isLittleEndian)
+                        )
+                    );
+                    offset += 12
+                }
+
+                // there's also a Uint16 "attribute byte count" that we
+                // don't need, it should always be zero.
+                offset += 2;
+
+                // Create a new face for from the vertices and the normal             
+                geo.faces.push(new THREE.Face3(i * 3, i * 3 + 1, i * 3 + 2, normal));
+            }
+
+            // The binary STL I'm testing with seems to have all
+            // zeroes for the normals, unlike its ASCII counterpart.
+            // We can use three.js to compute the normals for us, though,
+            // once we've assembled our geometry. This is a relatively 
+            // expensive operation, but only needs to be done once.
+            geo.computeFaceNormals();
+
+            var mesh = new THREE.Mesh(
+                geo,
+                // new THREE.MeshNormalMaterial({
+                //     overdraw:true
+                // }
+                new THREE.MeshLambertMaterial({
+                    overdraw: true,
+                    color: 0xaa0000,
+                    shading: THREE.FlatShading
+                }));
+            //scene.add(mesh);
+            this.sceneAdd(mesh);
+
+            stl = null;
         },
         //end stl parsing functions
 
