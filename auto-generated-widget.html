@@ -65,7 +65,7 @@ requirejs.config({
         ThreeFontUtils: '//i2dcui.appspot.com/js/three/FontUtils',
         ThreeHelvetiker: '//i2dcui.appspot.com/js/three/threehelvetiker',
         Clipper: '//i2dcui.appspot.com/js/clipper/clipper_unminified',
-        BinaryReader: '//raw.githubusercontent.com/raykholo/widget-stlViewer/master/binaryReader'
+        STLLoader: '//raw.githubusercontent.com/raykholo/widget-stlViewer/master/stl'
             //JSC3D: "//raw.githubusercontent.com/raykholo/widget-stlViewer/master/JSC3D"
     },
     shim: {
@@ -169,7 +169,7 @@ cprequire_test(["inline:com-chilipeppr-widget-stlViewer"], function(myWidget) {
 } /*end_test*/ );
 
 // This is the main definition of your widget. Give it a unique name.
-cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper", "jqueryuiWidget", "binaryReader"], function(cp, clipper, jqui, binaryR) {
+cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper", "jqueryuiWidget", "STLLoader"], function(cp, clipper, jqui, stlR) {
     return {
         /**
          * The ID of the widget. You must define this and make it unique.
@@ -709,70 +709,63 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     for (var i = 0; i < files.length; i++) {
                         console.log('Checking STL ', i);                    
                         (function(i) {
-                            // Loop through our files with a closure so each of our FileReader's are isolated.
-                            var reader = new FileReader();
-                            //console.log(reader);
-                            //console.log("file");
-                            //console.log(files[i]);
-                            //var thefile = files[i];
-                            reader.onload = function(event) {
-                  
-                                      
-                                
-                            var data = this.result
-                            var binreader = new BinaryReader(data);
-
-                            if (looksLikeBinary(binreader)) {
-                              //this.loadSTLBinary(reader);
-                              console.log('Dealing with a Binary STL');
-                              // Do what you need to to parse a Binary on here, data, contains a Binary STL
-                              //that.parseStlBinary (binreader);
-                              console.log ("binreader:  ", binreader);
-                              console.log("data:  ", data);
-                              
-                              
-                              //start direct binarySTLReading
-                              var FACE_VERTICES = 3;
-                              
-                              var HEADER_BYTES = 80;
-                              var FACE_COUNT_BYTES = 4;
-                              var FACE_NORMAL_BYTES = 12;
-                              var VERTEX_BYTES = 12;
-                              var ATTRIB_BYTE_COUNT_BYTES = 2;
-                              
-                              var mesh = new THREE.Mesh;
-                              mesh.vertexBuffer = [];
-                              mesh.indexBuffer = [];
-                              mesh.faceNormalBuffer = [];
-                              reader.reset();
-                              
-                              // skip 80-byte's STL file header
-                              reader.skip(HEADER_BYTES);
-                              
-                              
-                              
-                              
-                              //end direct binarySTLReading
-                              
-                            } else {
-                              //this.loadSTLString(file);
-                              console.log('Dealing with an ASCII STL');
-                              // Do what you need to to parse an ASCII on here, data, contains a ASCII STL
-                              
-                              
-                              
-                              
-                              console.log(data);
-                            }
+                            var self = this;
+                        
+                                // file reader instance
+                                var reader = new FileReader();
+                        
+                                // on file loaded
+                                reader.onloadend = function(event) {
+                                    // if error/abort
+                                    if (this.error) {
+                                        self.onError(this.error);
+                                        return;
+                                    }
+                        
+                                    // Parse ASCII STL
+                                    if (typeof this.result === 'string' ) {
+                                        self.loadString(this.result);
+                                        return;
+                                    }
+                        
+                                    // buffer reader
+                                    var view = new DataView(this.result);
+                        
+                                    // get faces number
+                                    try {
+                                        var faces = view.getUint32(80, true);
+                                    }
+                                    catch(error) {
+                                        self.onError(error);
+                                        return;
+                                    }
+                        
+                                    // is binary ?
+                                    var binary = view.byteLength == (80 + 4 + 50 * faces);
+                        
+                                    if (! binary) {
+                                        // get the file contents as string
+                                        // (faster than convert array buffer)
+                                        reader.readAsText(file);
+                                        return;
+                                    }
+                        
+                            // parse binary STL
+                            self.loadBinaryData(view, faces);
                         }
+                        
+                
+                        // start reading file as array buffer
+                        reader.readAsArrayBuffer(files[i]);                        
+                                        }
                         
                         
                         // read the file in, pass it to the BinaryReader and check if its Binary or STL
-                        reader.readAsBinaryString(files[i])
+                        //reader.readAsBinaryString(files[i])
     
                         
                         
-                        })(i);
+                        )(i);
                         
                     }
                         
@@ -891,8 +884,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
         //end reader functions
 
-
-
+        /*
         arrayBufferToString: function(buffer, onSuccess, onFail) {
             var bufView = new Uint8Array(buffer);
             var length = bufView.length;
@@ -915,20 +907,69 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
             return result;
 
-        },
+        },*/
         
         //start stl parsing functions
-        parseBinaryStl: function (dataIn) {
-            var FACE_VERTICES = 3;
+        parseStlBinary: function(stl) { //this is from jsstl.  we have a failure on the new DataView
+            var geo = new THREE.Geometry();
+            var dv = new DataView(stl, 80); // 80 == unused header
+            var isLittleEndian = true;
+            var triangles = dv.getUint32(0, isLittleEndian);
 
-            var HEADER_BYTES = 80;
-            var FACE_COUNT_BYTES = 4;
-            var FACE_NORMAL_BYTES = 12;
-            var VERTEX_BYTES = 12;
-            var ATTRIB_BYTE_COUNT_BYTES = 2;
-            
-            
-            
+            // console.log('arraybuffer length:  ' + stl.byteLength);
+            // console.log('number of triangles: ' + triangles);
+
+            var offset = 4;
+            for (var i = 0; i < triangles; i++) {
+                // Get the normal for this triangle
+                var normal = new THREE.Vector3(
+                    dv.getFloat32(offset, isLittleEndian),
+                    dv.getFloat32(offset + 4, isLittleEndian),
+                    dv.getFloat32(offset + 8, isLittleEndian)
+                );
+                offset += 12;
+
+                // Get all 3 vertices for this triangle
+                for (var j = 0; j < 3; j++) {
+                    geo.vertices.push(
+                        new THREE.Vector3(
+                            dv.getFloat32(offset, isLittleEndian),
+                            dv.getFloat32(offset + 4, isLittleEndian),
+                            dv.getFloat32(offset + 8, isLittleEndian)
+                        )
+                    );
+                    offset += 12
+                }
+
+                // there's also a Uint16 "attribute byte count" that we
+                // don't need, it should always be zero.
+                offset += 2;
+
+                // Create a new face for from the vertices and the normal             
+                geo.faces.push(new THREE.Face3(i * 3, i * 3 + 1, i * 3 + 2, normal));
+            }
+
+            // The binary STL I'm testing with seems to have all
+            // zeroes for the normals, unlike its ASCII counterpart.
+            // We can use three.js to compute the normals for us, though,
+            // once we've assembled our geometry. This is a relatively 
+            // expensive operation, but only needs to be done once.
+            geo.computeFaceNormals();
+
+            var mesh = new THREE.Mesh(
+                geo,
+                // new THREE.MeshNormalMaterial({
+                //     overdraw:true
+                // }
+                new THREE.MeshLambertMaterial({
+                    overdraw: true,
+                    color: 0xaa0000,
+                    shading: THREE.FlatShading
+                }));
+            //scene.add(mesh);
+            this.sceneAdd(mesh);
+
+            stl = null;
         },
         //end stl parsing functions
 

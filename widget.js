@@ -32,7 +32,7 @@ requirejs.config({
         ThreeFontUtils: '//i2dcui.appspot.com/js/three/FontUtils',
         ThreeHelvetiker: '//i2dcui.appspot.com/js/three/threehelvetiker',
         Clipper: '//i2dcui.appspot.com/js/clipper/clipper_unminified',
-        BinaryReader: '//raw.githubusercontent.com/raykholo/widget-stlViewer/master/binaryReader'
+        STLLoader: '//raw.githubusercontent.com/raykholo/widget-stlViewer/master/stl'
             //JSC3D: "//raw.githubusercontent.com/raykholo/widget-stlViewer/master/JSC3D"
     },
     shim: {
@@ -136,7 +136,7 @@ cprequire_test(["inline:com-chilipeppr-widget-stlViewer"], function(myWidget) {
 } /*end_test*/ );
 
 // This is the main definition of your widget. Give it a unique name.
-cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper", "jqueryuiWidget", "binaryReader"], function(cp, clipper, jqui, binaryR) {
+cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper", "jqueryuiWidget", "STLLoader"], function(cp, clipper, jqui, stlR) {
     return {
         /**
          * The ID of the widget. You must define this and make it unique.
@@ -676,46 +676,63 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     for (var i = 0; i < files.length; i++) {
                         console.log('Checking STL ', i);                    
                         (function(i) {
-                            // Loop through our files with a closure so each of our FileReader's are isolated.
-                            var reader = new FileReader();
-                            //console.log(reader);
-                            //console.log("file");
-                            //console.log(files[i]);
-                            //var thefile = files[i];
-                            reader.onload = function(event) {
-                  
-                                      
-                                
-                            var data = this.result
-                            var binreader = new BinaryReader(data);
-
-                            if (looksLikeBinary(binreader)) {
-                              //this.loadSTLBinary(reader);
-                              console.log('Dealing with a Binary STL');
-                              // Do what you need to to parse a Binary on here, data, contains a Binary STL
-                              that.parseStlBinary (binreader);
-                              console.log ("binreader:  ", binreader);
-                              console.log("data:  ", data);
-                              
-                            } else {
-                              //this.loadSTLString(file);
-                              console.log('Dealing with an ASCII STL');
-                              // Do what you need to to parse an ASCII on here, data, contains a ASCII STL
-                              
-                              
-                              
-                              
-                              console.log(data);
-                            }
+                            var self = this;
+                        
+                                // file reader instance
+                                var reader = new FileReader();
+                        
+                                // on file loaded
+                                reader.onloadend = function(event) {
+                                    // if error/abort
+                                    if (this.error) {
+                                        self.onError(this.error);
+                                        return;
+                                    }
+                        
+                                    // Parse ASCII STL
+                                    if (typeof this.result === 'string' ) {
+                                        self.loadString(this.result);
+                                        return;
+                                    }
+                        
+                                    // buffer reader
+                                    var view = new DataView(this.result);
+                        
+                                    // get faces number
+                                    try {
+                                        var faces = view.getUint32(80, true);
+                                    }
+                                    catch(error) {
+                                        self.onError(error);
+                                        return;
+                                    }
+                        
+                                    // is binary ?
+                                    var binary = view.byteLength == (80 + 4 + 50 * faces);
+                        
+                                    if (! binary) {
+                                        // get the file contents as string
+                                        // (faster than convert array buffer)
+                                        reader.readAsText(file);
+                                        return;
+                                    }
+                        
+                            // parse binary STL
+                            self.loadBinaryData(view, faces);
                         }
+                        
+                
+                        // start reading file as array buffer
+                        reader.readAsArrayBuffer(files[i]);                        
+                                        }
                         
                         
                         // read the file in, pass it to the BinaryReader and check if its Binary or STL
-                        reader.readAsBinaryString(files[i])
+                        //reader.readAsBinaryString(files[i])
     
                         
                         
-                        })(i);
+                        )(i);
                         
                     }
                         
