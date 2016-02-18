@@ -122,5 +122,19 @@ BinaryReader.prototype = {
 		if (!(this._pos + Math.ceil(neededBits / 8) < this._buffer.length)) {
 			throw new Error("Index out of bound");
 		}
+	},
+	//ray adding more functions here:
+	_reset: function() {
+	this.offset = 0;
+	},
+	
+	_skip: function(bytesToSkip) {
+	if(this.offset + bytesToSkip > this.data.length)
+		this.offset = this.data.length;
+	else
+		this.offset += bytesToSkip;
 	}
+	
+	
+	
 };
