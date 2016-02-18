@@ -1,4 +1,4 @@
-// namespace
+// namespace 
 var MeshesJS = MeshesJS || {};
 
 ;(function() {
