@@ -229,6 +229,14 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
         init: function() {
             console.log("I am being initted. Thanks.");
 
+           
+            
+            
+            console.log("our STL obj is alive: ", MeshesJS); //ThreeDxf);
+            var stlreader = new MeshesJS.STLLoader();
+            console.log("STL Reader:", stlreader);
+            this.stlReader = stlreader;
+1
             this.setupUiFromLocalStorage();
             this.btnSetup();
             this.forkSetup();
@@ -746,12 +754,13 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                                     if (! binary) {
                                         // get the file contents as string
                                         // (faster than convert array buffer)
-                                        reader.readAsText(file);
+                                        reader.readAsText(files[i] );       //ray changed from file to files[i]
                                         return;
                                     }
-                        
+                            console.log('Do we have a stlreader? ', this.stlreader)
                             // parse binary STL
-                            self.loadBinaryData(view, faces);
+                            
+                            this.stlReader.loadBinaryData(view, faces);
                         }
                         
                 
