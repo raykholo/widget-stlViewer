@@ -9,19 +9,28 @@ var MeshesJS = MeshesJS || {};
     // methods
     STLLoader.prototype.onGeometry = function(geometry) {
         //render here, 
-        
-        var material = new THREE.MeshPhongMaterial( { color: 0xff5533, specular: 0x111111, shininess: 200 } );  //taken from slotted disk example of STLLoader.  Bright orange!  Gets your attention!
-        
+
+
+        var stl = new THREE.Group();        
+        //var material = new THREE.MeshPhongMaterial( { color: 0xff5533, specular: 0x111111, shininess: 200 } );  //taken from slotted disk example of STLLoader.  Bright orange!  Gets your attention!
+
+        var colorrandom = '#' + Math.floor(Math.random()*16777215).toString(16);
+        var material = new THREE.MeshPhongMaterial( { color: colorrandom, specular: 0x111111, shininess: 200 } );  //taken from slotted disk example of STLLoader.  Bright orange!  Gets your attention!
+
         //return three mesh here
         var mesh = new THREE.Mesh( geometry, material );
+        stl.add(mesh);
         
         //return Edge Helper
         var edges = new THREE.EdgesHelper(mesh, 0x000000);
+        stl.add(edges);
         
+        var box = new THREE.BoxHelper(mesh, 0xaaaaaa);
+        stl.add(box);;
         
         console.log('Created mesh: ', mesh)
-        chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneadd", mesh);
-        chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneadd", edges);
+        chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneadd", stl);
+        
     };
     STLLoader.prototype.onError = function(error) {};
 
