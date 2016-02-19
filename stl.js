@@ -11,6 +11,7 @@ var MeshesJS = MeshesJS || {};
     STLLoader.prototype.onError = function(error) {};
 
     STLLoader.prototype.loadFile = function(file) {
+        console.log("Inside STL.js loadFile");
         // self alias
         var self = this;
 

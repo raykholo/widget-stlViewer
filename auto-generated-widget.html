@@ -49,7 +49,7 @@ requirejs.config({
     
     Also, please make sure you are not loading dependencies from different
     URLs that other widgets may already load like jquery, bootstrap,
-    three.js, etc.
+    three.js, etc.7
     
     You may slingshot content through ChiliPeppr's proxy URL if you desire
     to enable SSL for non-SSL URL's. ChiliPeppr's SSL URL is
@@ -232,11 +232,8 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
            
             
             
-            console.log("our STL obj is alive: ", MeshesJS); //ThreeDxf);
-            var stlreader = new MeshesJS.STLLoader();
-            console.log("STL Reader:", stlreader);
-            this.stlReader = stlreader;
-1
+            loader = new MeshesJS.STLLoader();
+
             this.setupUiFromLocalStorage();
             this.btnSetup();
             this.forkSetup();
@@ -670,27 +667,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 },
                 
                 drop: function(e) {
-                    var looksLikeBinary = function(reader) {
-                        // STL files don't specify a way to distinguish ASCII from binary.
-                        // The usual way is checking for "solid" at the start of the file --
-                        // but Thingiverse has seen at least one binary STL file in the wild
-                        // that breaks this.
-                        // The approach here is different: binary STL files contain a triangle
-                        // count early in the file.  If this correctly predicts the file's length,
-                        // it is most probably a binary STL file.
-                                
-                        reader.seek(80);  // skip the header
-                        var count = reader.readUInt32();
-                                
-                        var predictedSize = 80 /* header */ + 4 /* count */ + 50 * count;
-                        
-                        console.log('Binary Count: ', predictedSize);
-                        console.log('Reader Count: ', reader.getSize())
-                        
-                        return reader.getSize() == predictedSize;
-                    };
-                            
-                                  
+                    
                     $(this).removeClass('hover');
                     $(".com-chilipeppr-elem-dragdrop").removeClass('hover');
                     //$(".com-chilipeppr-elem-dragdrop").popover('hide');
@@ -698,7 +675,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             
                     e = e || window.event;
                     e.preventDefault();
-                                
+                            
                                 
                     // jQuery wraps the originalEvent, so we try to detect that here...
                     e = e.originalEvent || e;
@@ -715,75 +692,13 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     //chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondragleave", "");
 
                     for (var i = 0; i < files.length; i++) {
-                        console.log('Checking STL ', i);                    
+                        console.log('Loading STL no ', i);                    
                         (function(i) {
-                            var self = this;
-                        
-                                // file reader instance
-                                var reader = new FileReader();
-                        
-                                // on file loaded
-                                reader.onloadend = function(event) {
-                                    // if error/abort
-                                    if (this.error) {
-                                        self.onError(this.error);
-                                        return;
-                                    }
-                        
-                                    // Parse ASCII STL
-                                    if (typeof this.result === 'string' ) {
-                                        self.loadString(this.result);
-                                        return;
-                                    }
-                        
-                                    // buffer reader
-                                    console.log('Create DataView');
-                                    var view = new DataView(this.result);
-                        
-                                    // get faces number
-                                    try {
-                                        var faces = view.getUint32(80, true);
-                                    }
-                                    catch(error) {
-                                        self.onError(error);
-                                        return;
-                                    }
-                        
-                                    // is binary ?
-                                    var binary = view.byteLength == (80 + 4 + 50 * faces);
-                                    if (binary) {console.log('Found ASCII STL');};
-                        
-                                    if (! binary) {
-                                        console.log('Found ASCII STL');
-                                        // get the file contents as string
-                                        // (faster than convert array buffer)
-                                        reader.readAsText(files[i] );       //ray changed from file to files[i]
-                                        return;
-                                    }
-                            
-                            
-                            var loader = new MeshesJS.STLLoader;
-                            console.log('Do we have a stlreader? ', loader);
                             // parse binary STL
-                            try {
-                                loader.loadBinaryData(view, faces);
-                            } catch(err) {
-                                console.log("Error: ", err.message);
+                            loader.loadFile(files[i]);
                             }
-
-                        }
-                        
+             
                 
-                        // start reading file as array buffer
-                        reader.readAsArrayBuffer(files[i]);                        
-                                        }
-                        
-                        
-                        // read the file in, pass it to the BinaryReader and check if its Binary or STL
-                        //reader.readAsBinaryString(files[i])
-    
-                        
-                        
                         )(i);
                         
                     }
