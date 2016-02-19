@@ -704,6 +704,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                                     }
                         
                                     // buffer reader
+                                    console.log('Create DataView');
                                     var view = new DataView(this.result);
                         
                                     // get faces number
@@ -717,8 +718,10 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                         
                                     // is binary ?
                                     var binary = view.byteLength == (80 + 4 + 50 * faces);
+                                    if (binary) {console.log('Found ASCII STL');};
                         
                                     if (! binary) {
+                                        console.log('Found ASCII STL');
                                         // get the file contents as string
                                         // (faster than convert array buffer)
                                         reader.readAsText(files[i] );       //ray changed from file to files[i]
@@ -729,8 +732,12 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                             var loader = new MeshesJS.STLLoader;
                             console.log('Do we have a stlreader? ', loader);
                             // parse binary STL
-                            
-                            loader.loadBinaryData(view, faces);
+                            try {
+                                loader.loadBinaryData(view, faces);
+                            } catch(err) {
+                                console.log("Error: ", err.message);
+                            }
+
                         }
                         
                 
