@@ -223,16 +223,23 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             '/com-chilipeppr-elem-dragdrop/ondroppedSTL': 'We subscribe to this signal at a higher priority to intercept the signal, double check if it is an Eagle Brd file and if so, we do not let it propagate by returning false. That way the 3D Viewer, Gcode widget, or other widgets will not get Eagle Brd file drag/drop events because they will not know how to interpret them.'
         },
         /**
+         * The main object for this widget is the STL Loader so
+         * it is available in this property for all methods to refer to.
+         */
+        stlloader: null,
+        /**
          * All widgets should have an init method. It should be run by the
          * instantiating code like a workspace or a different widget.
          */
         init: function() {
             console.log("I am being initted. Thanks.");
 
-           
+            console.log('adding check: are we getting a defined callback from require: ', stlR );
+            console.log('and do we have the namespace:', MeshesJS);
             
             
-            loader = new MeshesJS.STLLoader();
+            this.stlloader = new MeshesJS.STLLoader();
+            console.log('and do we have the loader object, ', this.stlloader);
 
             this.setupUiFromLocalStorage();
             this.btnSetup();
@@ -695,7 +702,8 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                         console.log('Loading STL no ', i);                    
                         (function(i) {
                             // parse binary STL
-                            loader.loadFile(files[i]);
+                            console.log('But do we have a loader?', that.stlloader);
+                            that.stlloader.loadFile(files[i]);
                             console.log('After Loadfile no ', i);                    
                             }
              

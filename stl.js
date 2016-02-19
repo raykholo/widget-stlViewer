@@ -56,7 +56,7 @@ var MeshesJS = MeshesJS || {};
             }
 
             // parse binary STL
-            console.log("Inside STL.js Binary ASCII");
+            console.log("Inside STL.js Binary STL");
             self.loadBinaryData(view, faces);
         };
 
