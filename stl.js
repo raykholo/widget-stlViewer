@@ -44,11 +44,17 @@ var MeshesJS = MeshesJS || {};
         
         //return Edge Helper
         var edgecolor = self.ColorLuminance(colorrandom, -0.2);	// -20% darker colorrandom 
-        var edges = new THREE.EdgesHelper(mesh, edgecolor);      //ray changed edges from black to soft grey color // peter changed to shades (;)
+        var edges = new THREE.EdgesHelper(mesh, edgecolor);      //ray changed edges from black to soft grey color // peter changed to shades (;)   //ray wins
         stl.add(edges);
         
-        var box = new THREE.BoundingBoxHelper(mesh, 0xffffff);
-        stl.add(box);;
+        //var box = new THREE.BoxHelper(mesh, 0xffffff);      //at some point play around with using BoundingBox helper
+        //stl.add(box);;
+        
+        var boxColor = self.ColorLuminance(colorrandom, 0.6); // 60% lighter colorrandom
+        
+        var bbox = new THREE.BoundingBoxHelper(mesh, boxColor);
+        bbox.update();
+        stl.add(bbox);
         
         chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneadd", stl);
         
