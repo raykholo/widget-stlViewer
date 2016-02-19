@@ -1,7 +1,7 @@
 # com-chilipeppr-widget-stlViewer
 This example widget gives you a framework for creating your own widget. Please change this description once you fork this template and create your own widget. Make sure to run runme.js every time you are done editing your code so you can regenerate your README.md file, regenerate your auto-generated-widget.html, and automatically push your changes to Github.
 
-![alt text](screenshot.png "Screenshot")
+
 
 ## ChiliPeppr Widget / stlViewer
 

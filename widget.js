@@ -523,7 +523,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             var that = this;
             //setTimeout(function () {
             //that.open();
-            this.testCube();
+            //this.testCube();
             //}, 1000);
         },
         obj3d: null, // gets the 3dviewer obj stored in here on callback

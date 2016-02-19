@@ -22,13 +22,12 @@ var MeshesJS = MeshesJS || {};
         stl.add(mesh);
         
         //return Edge Helper
-        var edges = new THREE.EdgesHelper(mesh, 0x000000);
+        var edges = new THREE.EdgesHelper(mesh, 0xbfbfbf);      //ray changed edges from black to soft grey color
         stl.add(edges);
         
-        var box = new THREE.BoxHelper(mesh, 0xaaaaaa);
+        var box = new THREE.BoxHelper(mesh, 0xffffff);
         stl.add(box);;
         
-        console.log('Created mesh: ', mesh)
         chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneadd", stl);
         
     };
