@@ -100,6 +100,7 @@ var MeshesJS = MeshesJS || {};
     };
 
     STLLoader.prototype.loadBinaryData = function(view, faces) {
+        console.log('Yay We are inside loadBinaryData:   Face:', faces, ', View: ', view );
         if (! view instanceof DataView) {
             var view = new DataView(view);
         }
