@@ -670,6 +670,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                         (function(i) {
                             // parse binary STL
                             console.log('But do we have a loader?', that.stlloader);
+                            console.log("what does loadFile look like?", that.stlloader.loadFile);
                             that.stlloader.loadFile(files[i]);
                             console.log('After Loadfile no ', i);                    
                             }
