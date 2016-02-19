@@ -6,11 +6,32 @@ var MeshesJS = MeshesJS || {};
     // Constructor
     function STLLoader() {}
 
+    STLLoader.prototype.ColorLuminance = function(hex, lum) {
+    
+    	// validate hex string
+    	hex = String(hex).replace(/[^0-9a-f]/gi, '');
+    	if (hex.length < 6) {
+    		hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    	}
+    	lum = lum || 0;
+    
+    	// convert to decimal and change luminosity
+    	var rgb = "#", c, i;
+    	for (i = 0; i < 3; i++) {
+    		c = parseInt(hex.substr(i*2,2), 16);
+    		c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
+    		rgb += ("00"+c).substr(c.length);
+    	}
+    
+    	return rgb;
+    };
+
     // methods
     STLLoader.prototype.onGeometry = function(geometry) {
+
+        var self = this;
+
         //render here, 
-
-
         var stl = new THREE.Group();        
         //var material = new THREE.MeshPhongMaterial( { color: 0xff5533, specular: 0x111111, shininess: 200 } );  //taken from slotted disk example of STLLoader.  Bright orange!  Gets your attention!
 
@@ -22,10 +43,11 @@ var MeshesJS = MeshesJS || {};
         stl.add(mesh);
         
         //return Edge Helper
-        var edges = new THREE.EdgesHelper(mesh, 0xbfbfbf);      //ray changed edges from black to soft grey color
+        var edgecolor = self.ColorLuminance(colorrandom, -0.2);	// -20% darker colorrandom 
+        var edges = new THREE.EdgesHelper(mesh, edgecolor);      //ray changed edges from black to soft grey color // peter changed to shades (;)
         stl.add(edges);
         
-        var box = new THREE.BoxHelper(mesh, 0xffffff);
+        var box = new THREE.BoundingBoxHelper(mesh, 0xffffff);
         stl.add(box);;
         
         chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneadd", stl);
