@@ -724,10 +724,13 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                                         reader.readAsText(files[i] );       //ray changed from file to files[i]
                                         return;
                                     }
-                            console.log('Do we have a stlreader? ', this.stlreader)
+                            
+                            
+                            var loader = new MeshesJS.STLLoader;
+                            console.log('Do we have a stlreader? ', loader);
                             // parse binary STL
                             
-                            this.stlReader.loadBinaryData(view, faces);
+                            loader.loadBinaryData(view, faces);
                         }
                         
                 
