@@ -663,6 +663,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                         (function(i) {
                             // parse binary STL
                             loader.loadFile(files[i]);
+                            console.log('After Loadfile no ', i);                    
                             }
              
                 

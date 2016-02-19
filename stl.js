@@ -20,6 +20,7 @@ var MeshesJS = MeshesJS || {};
 
         // on file loaded
         reader.onloadend = function(event) {
+            console.log("Inside STL.js loadFile:onLoadend");
             // if error/abort
             if (this.error) {
                 self.onError(this.error);
@@ -28,6 +29,7 @@ var MeshesJS = MeshesJS || {};
 
             // Parse ASCII STL
             if (typeof this.result === 'string' ) {
+                console.log("Inside STL.js Found ASCII");
                 self.loadString(this.result);
                 return;
             }
@@ -50,11 +52,11 @@ var MeshesJS = MeshesJS || {};
             if (! binary) {
                 // get the file contents as string
                 // (faster than convert array buffer)
-                reader.readAsText(file);
                 return;
             }
 
             // parse binary STL
+            console.log("Inside STL.js Binary ASCII");
             self.loadBinaryData(view, faces);
         };
 
