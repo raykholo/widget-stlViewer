@@ -7,7 +7,22 @@ var MeshesJS = MeshesJS || {};
     function STLLoader() {}
 
     // methods
-    STLLoader.prototype.onGeometry = function(geometry) {};
+    STLLoader.prototype.onGeometry = function(geometry) {
+        //render here, 
+        
+        var material = new THREE.MeshPhongMaterial( { color: 0xff5533, specular: 0x111111, shininess: 200 } );  //taken from slotted disk example of STLLoader.  Bright orange!  Gets your attention!
+        
+        //return three mesh here
+        var mesh = new THREE.Mesh( geometry, material );
+        
+        //return Edge Helper
+        var edges = new THREE.EdgesHelper(mesh, 0x000000);
+        
+        
+        console.log('Created mesh: ', mesh)
+        chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneadd", mesh);
+        chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneadd", edges);
+    };
     STLLoader.prototype.onError = function(error) {};
 
     STLLoader.prototype.loadFile = function(file) {
