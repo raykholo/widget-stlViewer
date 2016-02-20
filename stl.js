@@ -38,28 +38,42 @@ var MeshesJS = MeshesJS || {};
         //var material = new THREE.MeshPhongMaterial( { color: 0xff5533, specular: 0x111111, shininess: 200 } );  //taken from slotted disk example of STLLoader.  Bright orange!  Gets your attention!
 
         var colorrandom = '#' + Math.floor(Math.random()*16777215).toString(16);
-        var material = new THREE.MeshPhongMaterial( { color: colorrandom, specular: 0x111111, shininess: 200 } );  //taken from slotted disk example of STLLoader.  Bright orange!  Gets your attention!
+        var material = new THREE.MeshPhongMaterial( { color: colorrandom, specular: 0x111111, shininess: 60 } );  //taken from slotted disk example of STLLoader.  Bright orange!  Gets your attention!
 
         //return three mesh here
         var mesh = new THREE.Mesh( geometry, material );
         stl.add(mesh);
         
-        //return Edge Helper
-        var edgecolor = self.ColorLuminance(colorrandom, -0.2);	// -20% darker colorrandom 
-        var edges = new THREE.EdgesHelper(mesh, edgecolor);      //ray changed edges from black to soft grey color // peter changed to shades (;)   //ray wins
-        stl.add(edges);
-        
-        //var box = new THREE.BoxHelper(mesh, 0xffffff);      //at some point play around with using BoundingBox helper
-        //stl.add(box);;
-        
-        var boxColor = self.ColorLuminance(colorrandom, 0.4); // 40% lighter colorrandom
-        
         var bbox = new THREE.BoundingBoxHelper(mesh, boxColor);
         bbox.update();
         stl.add(bbox);
         object.add(stl);
+        
+        // Calculate position
+        console.log('Object no: ', number, ' Min: ', bbox.box.min);
+        console.log('Object no: ', number, ' Max: ', bbox.box.max);
+        
+        // Put object on Z=0
+        mesh.translateZ(bbox.box.min.z * -1)
+        bbox.translateZ(bbox.box.min.z * -1)
+        
+        
+        //return Edge Helper
+        var edgecolor = self.ColorLuminance(colorrandom, -0.05);	// -5% darker colorrandom 
+        var edges = new THREE.EdgesHelper(mesh, edgecolor);      //ray changed edges from black to soft grey color // peter changed to shades (;)   //ray wins
+        stl.add(edges);
+        
+        var boxColor = self.ColorLuminance(colorrandom, 0.4); // 40% lighter colorrandom
+       
+        
+        
         //chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneadd", stl);
         chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneadd", object);
+        
+        
+        
+        
+        
         
     };
     STLLoader.prototype.onError = function(error) {};
