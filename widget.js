@@ -223,6 +223,14 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
             console.log("I am done being initted.");
         },
+        
+        setupSlicingParamUI: function () {
+            
+            // lets bind some onchange events
+            $('#' + this.id + ' .slicing-param').forEach(function(a, b) {
+               console.log("a:", a, "b:", b); 
+            });
+        },
 
         testCube: function() {
             var geometry = new THREE.BoxGeometry(10, 10, 10);
@@ -334,6 +342,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 console.log("just evaled options: ", options);
             }
             else {
+                // sets defaults for first time loaders
                 options = {
                     showBody: true,
                     tabShowing: 1,
@@ -341,6 +350,8 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     customParam2: 1.0
                 };
             }
+            
+            // this.options.tabShowing
 
             this.options = options;
             console.log("options:", options);
