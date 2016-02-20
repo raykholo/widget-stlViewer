@@ -253,20 +253,35 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             {
                 //console.log ("Not value.  ticked: ", ticked);
                 valueToWrite = ticked;  //set valueToWrite to checkbox value
+                //may need to convert bool to string .ToString()
             }
             else 
                 valueToWrite = value;
+            
             
             console.log ("valueToWrite:  ", valueToWrite);
             
             var regExPattern = /slicing-param-[a-zA-Z]+/;
             
             var regExpResult = clsName.match(regExPattern);
-            console.log ("regexp result:  ", regExpResult[0], "  ");
+            var regExpResultAsString = regExpResult[0];
+            //console.log ("regexp result:  ", regExpResult[0], "  ");
+            
+            regExpResultAsString=regExpResultAsString.replace('slicing-param-', '');
+            console.log ("regexp result:  ", regExpResultAsString);
+            
+            
+            this.selectedParams[regExpResultAsString] = valueToWrite;
+            
+            console.log ("selectedParams:  ", this.selectedParams);
             
             //localStorage.setItem(this.id + "param");
         },
-        selectedParams: {},
+        selectedParams: {
+            testval:  "Hello Peter"
+            //layerHeight: 0.3,
+            //infillPattern: "Rectlinear"
+        },
         
         
 
@@ -326,10 +341,11 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 // Make sure popover is immediately hidden
                 $('#' + that.id + ' .btn-sayhello').popover("hide");
                 // Show a flash msg
+                
                 chilipeppr.publish(
                     "/com-chilipeppr-elem-flashmsg/flashmsg",
-                    "Hello Title",
-                    "Hello World from widget " + that.id,
+                    "Slicer Params",
+                    JSON.stringify(that.selectedParams, null, 2),
                     1000
                 );
             });
