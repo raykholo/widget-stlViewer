@@ -214,6 +214,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
             //$('#com-chilipeppr-widget-stlViewer').click(this.loadChiliPepprGcode.bind(this));
 
+            this.setupSlicingParamUI();
 
             this.setupDragDrop();
 
@@ -227,9 +228,23 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
         setupSlicingParamUI: function () {
             
             // lets bind some onchange events
-            $('#' + this.id + ' .slicing-param').forEach(function(a, b) {
-               console.log("a:", a, "b:", b); 
+            var that = this;
+            $('#' + this.id + ' .slicing-param').each(function(index, elem) {
+               console.log("index:", index, "elem:", elem);
+               var el = $(elem);
+               console.log(el);
+               el.change(that.onParamChange.bind(that));
             });
+        },
+        onParamChange: function(el, el2) {
+            console.log("got change on el:", el, el2);  
+            
+            ///var clsName = $(#com-chilipeppr-widget-stlViewer-tab2).attr('class');          //I added the $( ) wrapper around el b/c error el.attr is not a function
+                
+            //var clsName = $(el).attr('outerHTML');
+            console.log("clsName:  ", el.target.className);         //clsName returns the classes (all of them) now
+      
+            //localStorage.setItem(this.id + "param");
         },
 
         testCube: function() {

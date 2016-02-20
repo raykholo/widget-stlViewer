@@ -247,6 +247,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
             //$('#com-chilipeppr-widget-stlViewer').click(this.loadChiliPepprGcode.bind(this));
 
+            this.setupSlicingParamUI();
 
             this.setupDragDrop();
 
@@ -260,9 +261,23 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
         setupSlicingParamUI: function () {
             
             // lets bind some onchange events
-            $('#' + this.id + ' .slicing-param').forEach(function(a, b) {
-               console.log("a:", a, "b:", b); 
+            var that = this;
+            $('#' + this.id + ' .slicing-param').each(function(index, elem) {
+               console.log("index:", index, "elem:", elem);
+               var el = $(elem);
+               console.log(el);
+               el.change(that.onParamChange.bind(that));
             });
+        },
+        onParamChange: function(el, el2) {
+            console.log("got change on el:", el, el2);  
+            
+            ///var clsName = $(#com-chilipeppr-widget-stlViewer-tab2).attr('class');          //I added the $( ) wrapper around el b/c error el.attr is not a function
+                
+            //var clsName = $(el).attr('outerHTML');
+            console.log("clsName:  ", el.target.className);         //clsName returns the classes (all of them) now
+      
+            //localStorage.setItem(this.id + "param");
         },
 
         testCube: function() {
@@ -942,7 +957,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
             <div class="btn-toolbar pull-right" role="toolbar">
                 <div class="btn-group">
-                    
+
                     <!--<button type="button" class="btn btn-xs btn-default btn-sayhello" data-delay="1000" data-animation="true" data-placement="auto" data-container="body" data-trigger="hover" data-title="Say Hello" data-content="Generate a hello message">Say Hello
                     </button>-->
                 </div>
@@ -957,49 +972,70 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                         <ul class="dropdown-menu dropdown-menu-right" role="menu"></ul>
                     </div>
                 </div>
-            </div> <span class="panel-title" data-toggle="popover">Template Widget</span> <span style="font-size:9px;" class="fb-build">v1</span>
+            </div> <span class="panel-title" data-toggle="popover">STL Viewer</span> <span style="font-size:9px;" class="fb-build">v1</span>
 
         </div>
         <div class="panel-body">
             <!-- Nav tabs -->
             <ul class="nav nav-tabs" role="tablist">
-                <li class="active"><a href="#com-chilipeppr-widget-stlViewer-tab1" role="tab" data-toggle="tab">Render</a>
+                <li><a href="#com-chilipeppr-widget-stlViewer-tab1" role="tab" data-toggle="tab">Render</a>
                 </li>
-                <li><a href="#com-chilipeppr-widget-stlViewer-tab2" role="tab" data-toggle="tab">Slicing</a></li>
+                <li class="active"><a href="#com-chilipeppr-widget-stlViewer-tab2" role="tab" data-toggle="tab">Slicing</a></li>
                 <li><a href="#com-chilipeppr-widget-stlViewer-tab3" role="tab" data-toggle="tab">Gcode</a></li>
             </ul>
             <!-- Tab panes -->
 
             <!-- Tab 1 -->
             <div class="tab-content">
-                <div class="tab-pane active" id="com-chilipeppr-widget-stlViewer-tab1">
-                    <p>This is the content of tab 1.</p>
+                <div class="tab-pane " id="com-chilipeppr-widget-stlViewer-tab1">
+                    <p>STL Layout Control: </p>
                     <div class="">
-                        <button type="button" class="btn btn-xs btn-default btn-helloworld2" style="margin: 4px 0;">Hello World 2</button>
+                        <!--<button type="button" class="btn btn-xs btn-default btn-helloworld2" style="margin: 4px 0;">Hello World 2</button>-->
                     </div>
                 </div>
 
                 <!-- Tab 2 -->
-                <div class="tab-pane" id="com-chilipeppr-widget-stlViewer-tab2">
-                    <p>This is the content of tab 2.</p>
-                    
+                <div class="tab-pane active" id="com-chilipeppr-widget-stlViewer-tab2">
+                    <p>Select your slicing parameters:</p>
+                    <!--param start here-->
                     <div class="form-group">
-                    <label class="sr-only" for="exampleInputAmount">Layer Height</label>
-                    <div class="input-group">
-                        <input type="number" min="0" max="1" step="0.01" class="form-control" id="exampleInputAmount" placeholder="0.0" value="0.3">
-                        <div class="input-group-addon">mm</div>
-                    </div>
-                    </div>
-                    
-                    <div class="checkbox">
-                      <label>
-                        <input type="checkbox" value="">
-                        Spiral vase
-                      </label>
+                        <!--<label class="sr-only" for="exampleInputAmount">Layer Height</label>-->
+                        Layer Height: 
+                        <div class="input-group">
+                            <input type="number" min="0" max="1.8" step="0.01" class="slicing-param slicing-param-layerHeight form-control" id="exampleInputAmount" placeholder="0.0" value="0.3">
+                            <div class="input-group-addon">mm</div>
+                        </div>
                     </div>
                     
-                    <select class="form-control"><option value="/dev/ttyACM0">TinyG G2 (ttyACM0)</option><option value="/dev/ttyACM1">/dev/ttyACM1</option><option value="/dev/ttyAMA0">ttyAMA0</option></select>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+  =                  
+                    
+                    
+                    
+                    
+                    
 
+                    <div class="checkbox">
+                        <label>
+                            <input class="slicing-param slicing-param-spiralVaseMode" type="checkbox" value=""> Spiral vase
+                        </label>
+                    </div>
+
+                    <select class="form-control slicing-param">
+                        <option value="Honeycomb">Honeycomb</option>
+                        <option value="Rectlinear">Rectlinear</option>
+                    </select>
+                    
+                    <!--param end here-->
                 </div>
 
                 <!-- Tab 3 -->
