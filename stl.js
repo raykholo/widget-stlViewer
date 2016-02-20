@@ -50,7 +50,7 @@ var MeshesJS = MeshesJS || {};
         //var box = new THREE.BoxHelper(mesh, 0xffffff);      //at some point play around with using BoundingBox helper
         //stl.add(box);;
         
-        var boxColor = self.ColorLuminance(colorrandom, 0.6); // 60% lighter colorrandom
+        var boxColor = self.ColorLuminance(colorrandom, 0.4); // 40% lighter colorrandom
         
         var bbox = new THREE.BoundingBoxHelper(mesh, boxColor);
         bbox.update();
