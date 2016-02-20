@@ -261,8 +261,8 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             
             var regExPattern = /slicing-param-[a-zA-Z]+/;
             
-            var regExpResult = regExPattern.exec(clsName);
-            console.log ("regexp result:  ", regExpResult, "  ");
+            var regExpResult = clsName.match(regExPattern);
+            console.log ("regexp result:  ", regExpResult[0], "  ");
             
             //localStorage.setItem(this.id + "param");
         },
