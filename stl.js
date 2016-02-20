@@ -27,11 +27,13 @@ var MeshesJS = MeshesJS || {};
     };
 
     // methods
-    STLLoader.prototype.onGeometry = function(geometry) {
+    STLLoader.prototype.onGeometry = function(geometry, number) {
+        console.log("Geometry dropped STL no: ", number);
 
         var self = this;
 
         //render here, 
+        var object = new THREE.Group();   
         var stl = new THREE.Group();        
         //var material = new THREE.MeshPhongMaterial( { color: 0xff5533, specular: 0x111111, shininess: 200 } );  //taken from slotted disk example of STLLoader.  Bright orange!  Gets your attention!
 
@@ -55,14 +57,16 @@ var MeshesJS = MeshesJS || {};
         var bbox = new THREE.BoundingBoxHelper(mesh, boxColor);
         bbox.update();
         stl.add(bbox);
-        
-        chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneadd", stl);
+        object.add(stl);
+        //chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneadd", stl);
+        chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneadd", object);
         
     };
     STLLoader.prototype.onError = function(error) {};
 
-    STLLoader.prototype.loadFile = function(file) {
+    STLLoader.prototype.loadFile = function(file, number) {
         console.log("Inside STL.js loadFile");
+        console.log("Working with dropped STL no: ", number);
         // self alias
         var self = this;
 
@@ -81,7 +85,7 @@ var MeshesJS = MeshesJS || {};
             // Parse ASCII STL
             if (typeof this.result === 'string' ) {
                 console.log("Inside STL.js Found ASCII");
-                self.loadString(this.result);
+                self.loadString(this.result, number);
                 return;
             }
 
@@ -109,14 +113,14 @@ var MeshesJS = MeshesJS || {};
 
             // parse binary STL
             console.log("Inside STL.js Binary STL");
-            self.loadBinaryData(view, faces);
+            self.loadBinaryData(view, faces, number);
         };
 
         // start reading file as array buffer
         reader.readAsArrayBuffer(file);
     };
 
-    STLLoader.prototype.loadString = function(data) {
+    STLLoader.prototype.loadString = function(data, number) {
         var length, normal, patternNormal, patternVertex, result, text;
         var geometry = new THREE.Geometry();
         var patternFace = /facet([\s\S]*?)endfacet/g;
@@ -151,11 +155,11 @@ var MeshesJS = MeshesJS || {};
         geometry.computeBoundingBox();
         geometry.computeBoundingSphere();
 
-        this.onGeometry(geometry);
+        this.onGeometry(geometry, number);
     };
 
-    STLLoader.prototype.loadBinaryData = function(view, faces) {
-        console.log('Yay We are inside loadBinaryData:   Face:', faces, ', View: ', view );
+    STLLoader.prototype.loadBinaryData = function(view, faces, number) {
+        console.log('Yay We are inside loadBinaryData:   Face:', faces, ', View: ', view, ' Number: ', number );
         if (! view instanceof DataView) {
             var view = new DataView(view);
         }
@@ -201,7 +205,7 @@ var MeshesJS = MeshesJS || {};
         geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
         geometry.addAttribute('normal', new THREE.BufferAttribute(normals, 3));
 
-        this.onGeometry(geometry);
+        this.onGeometry(geometry, number);
     };
 
     // export module

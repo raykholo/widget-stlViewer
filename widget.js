@@ -194,6 +194,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
          * it is available in this property for all methods to refer to.
          */
         stlloader: null,
+        object: null, // Used in stl.js to push the combined STL plate to sceneAdd
         /**
          * All widgets should have an init method. It should be run by the
          * instantiating code like a workspace or a different widget.
@@ -729,19 +730,22 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     $(".com-chilipeppr-elem-dragdrop").removeClass('hover');
                     //$(".com-chilipeppr-elem-dragdrop").popover('hide');
                     //chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondragleave", "");
+                    
+                    console.log("Files dropped: ", files);
 
                     for (var i = 0; i < files.length; i++) {
-                        console.log('Loading STL no ', i);                    
+                        console.log('Loading STL no ', i);  
+                        $('#stlFileNames > tbody:last-child').append('<tr id="tr'+[i]+'"><td>'+[i]+'</td><td>'+files[i].name+'</td></tr>');
                         (function(i) {
                             // parse binary STL
                             console.log('But do we have a loader?', that.stlloader);
                             console.log("what does loadFile look like?", that.stlloader.loadFile);
-                            that.stlloader.loadFile(files[i]);
+                            that.stlloader.loadFile(files[i], i);
                             console.log('After Loadfile no ', i);                    
                             }
-             
-                
                         )(i);
+                        
+                
                         
                     }
                         
