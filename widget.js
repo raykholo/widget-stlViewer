@@ -238,14 +238,37 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
         },
         onParamChange: function(el, el2) {
             console.log("got change on el:", el, el2);  
+
+            // Extract the data we need from the passed object
+            var clsName = el.target.className;          //I added the $( ) wrapper around el b/c error el.attr is not a function
+            var value =  el.target.value;
+            var ticked = el.target.checked;             //looking through el to see what target contains checked
             
-            ///var clsName = $(#com-chilipeppr-widget-stlViewer-tab2).attr('class');          //I added the $( ) wrapper around el b/c error el.attr is not a function
-                
-            //var clsName = $(el).attr('outerHTML');
-            console.log("clsName:  ", el.target.className);         //clsName returns the classes (all of them) now
-      
+            
+            
+            console.log("clsName:  ", clsName, ' value: ', value, ' ticked: ', ticked);         //clsName returns the classes (all of them) now
+            
+            var valueToWrite;
+            if (!value)
+            {
+                //console.log ("Not value.  ticked: ", ticked);
+                valueToWrite = ticked;  //set valueToWrite to checkbox value
+            }
+            else 
+                valueToWrite = value;
+            
+            console.log ("valueToWrite:  ", valueToWrite);
+            
+            var regExPattern = /slicing-param-[a-zA-Z]+/;
+            
+            var regExpResult = regExPattern.exec(clsName);
+            console.log ("regexp result:  ", regExpResult, "  ");
+            
             //localStorage.setItem(this.id + "param");
         },
+        selectedParams: {},
+        
+        
 
         testCube: function() {
             var geometry = new THREE.BoxGeometry(10, 10, 10);
