@@ -103,6 +103,7 @@ var MeshesJS = MeshesJS || {};
             if (! binary) {
                 // get the file contents as string
                 // (faster than convert array buffer)
+                reader.readAsText(file);
                 return;
             }
 
