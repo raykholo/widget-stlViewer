@@ -371,8 +371,9 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 //forEach param, if the key exists in selectedParams this means it is a needed key
                 //then replace the key with this one. then update html?  
                 $.each(options, function(key, value) {
-                    key = JSON.stringify(key);
-                    var defKey = JSON.stringify(defaultParams.key); //Need help here.  defKey comes back undefined.
+                    //key = JSON.stringify(key);
+                    console.log('Debug:  Key = ', key);  //, So KEY contains the NAME of the key (value)
+                    var defKey = defaultParams[key]; // but defaultparams.(.....) you want the ... to be the substituted name? (i.e insert key here)
                     console.log ("key:  ", key, " value:  ", value, "defKey:  ", defKey);
                     if (defaultParams.key != null) {
                     // if (typeof(defaultParams.key) !== 'undefined') {
