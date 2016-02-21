@@ -216,6 +216,8 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             //$('#com-chilipeppr-widget-stlViewer').click(this.loadChiliPepprGcode.bind(this));
 
             this.setupSlicingParamUI();
+            
+            this.setupParamsFromLocalStorage();
 
             this.setupDragDrop();
 
@@ -233,8 +235,17 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             $('#' + this.id + ' .slicing-param').each(function(index, elem) {
                console.log("index:", index, "elem:", elem);
                var el = $(elem);
-               console.log(el);
+               console.log("el: ", el);
                el.change(that.onParamChange.bind(that));
+               
+               
+               var clsName = el.context.className; 
+               console.log ("clsName:  ", clsName);
+               
+               var defaultValue = el.context.defaultValue;
+               //console.log ("defaultValue:  ", defaultValue);
+               
+              that.selectedParams[that.getUniqueParamName(clsName)] = defaultValue;
             });
         },
         onParamChange: function(el, el2) {
@@ -259,31 +270,105 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             else 
                 valueToWrite = value;
             
-            
             console.log ("valueToWrite:  ", valueToWrite);
             
-            var regExPattern = /slicing-param-[a-zA-Z]+/;
             
-            var regExpResult = clsName.match(regExPattern);
-            var regExpResultAsString = regExpResult[0];
-            //console.log ("regexp result:  ", regExpResult[0], "  ");
-            
-            regExpResultAsString=regExpResultAsString.replace('slicing-param-', '');
-            console.log ("regexp result:  ", regExpResultAsString);
-            
-            
-            this.selectedParams[regExpResultAsString] = valueToWrite;
+            this.selectedParams[this.getUniqueParamName(clsName)] = valueToWrite;
             
             console.log ("selectedParams:  ", this.selectedParams);
             
             //localStorage.setItem(this.id + "param");
+            this.saveParamsLocalStorage();
         },
         selectedParams: {
-            testval:  "Hello Peter"
+            testval:  "Duck Development Done!"
             //layerHeight: 0.3,
             //infillPattern: "Rectlinear"
         },
+        getUniqueParamName: function (input) {
+            var regExPattern = /slicing-param-[a-zA-Z]+/;
+            var regExpResult = input.match(regExPattern);
+            var regExpResultAsString = regExpResult[0];
+            
+            regExpResultAsString=regExpResultAsString.replace('slicing-param-', '');
+            
+            return regExpResultAsString;
+        },
+        combineInputDataTypes: function (value, ticked) {
+            var valueToWrite;
+            if (!value)
+            {
+                //console.log ("Not value.  ticked: ", ticked);
+                valueToWrite = ticked;  //set valueToWrite to checkbox value
+                //may need to convert bool to string .ToString()
+            }
+            else
+            {
+                valueToWrite = value;
+            }
+            return valueToWrite;
+        },
         
+        setupParamsFromLocalStorage: function() {
+
+            // Read vals from localStorage. Make sure to use a unique
+            // key specific to this widget so as not to overwrite other
+            // widgets' options. By using this.id as the prefix of the
+            // key we're safe that this will be unique.
+
+            // Feel free to add your own keys inside the options 
+            // object for your own items
+            var that = this;
+            
+            var defaultParams = this.selectedParams;
+            defaultParams.infillPattern = "Rectlinear";
+            console.log ("Default Params:  ", defaultParams);
+            
+            var options = localStorage.getItem(this.id + '-params');
+            if (options) {
+                options = $.parseJSON(options);
+                options.catchMe = "gotcha!";
+                console.log("just evaled params: ", options);
+                
+                //forEach param, if the key exists in selectedParams this means it is a needed key
+                //then replace the key with this one. then update html?  
+                $.each(options, function(key, value) {
+                    key = JSON.stringify(key);
+                    var defKey = JSON.stringify(defaultParams.key); //Need help here.  defKey comes back undefined.
+                    console.log ("key:  ", key, " value:  ", value, "defKey:  ", defKey);
+                    if (defaultParams.key != null) {
+                    // if (typeof(defaultParams.key) !== 'undefined') {
+                        console.log ("do: ", key);
+                    }
+                    else
+                        console.log ("Caught: ", key);
+                    
+                });
+                
+                
+            }
+            
+            // this.options.tabShowing
+
+            //this.options = options;
+            console.log("params:", options);
+
+        },
+        /**
+         * When a user changes a value that is stored as an option setting, you
+         * should call this method immediately so that on next load the value
+         * is correctly set.
+         */
+        saveParamsLocalStorage: function() {
+            // You can add your own values to this.options to store them
+            // along with some of the normal stuff like showBody
+            var options = this.selectedParams;
+
+            var optionsStr = JSON.stringify(options);
+            console.log("saving options:", options, "json.stringify:", optionsStr);
+            // store settings to localStorage
+            localStorage.setItem(this.id + '-params', optionsStr);
+        },
         
 
         testCube: function() {

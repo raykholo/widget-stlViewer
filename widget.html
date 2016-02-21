@@ -74,48 +74,116 @@
                     <div class="">
                         <!--<button type="button" class="btn btn-xs btn-default btn-helloworld2" style="margin: 4px 0;">Hello World 2</button>-->
                     </div>
-                     <div id="listOfStls">
-                      <table class="table table-hover table-striped table-condensed listOfStls" id="stlFileNames">
-                        <thead>
-                          <tr>
-                            <th>#</th>
-                            <th>Filename</th>
-                          </tr>
-                        </thead>
-                        <tbody id="stlFileNamesTbody">
-                        </tbody>
-                      </table>
+                    <div id="listOfStls">
+                        <table class="table table-hover table-striped table-condensed listOfStls" id="stlFileNames">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Filename</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stlFileNamesTbody">
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
                 <!-- Tab 2 -->
                 <div class="tab-pane active" id="com-chilipeppr-widget-stlViewer-tab2">
+                    <br/>
                     <p>Select your slicing parameters:</p>
                     <!--param start here-->
-                    <div class="form-group">
-                        <!--<label class="sr-only" for="exampleInputAmount">Layer Height</label>-->
-                        Layer Height: 
-                        <div class="input-group input-group-sm">
-                            <input type="number" min="0" max="1.8" step="0.01" class="slicing-param slicing-param-layerHeight form-control" id="exampleInputAmount" placeholder="0.0" value="0.3">
-                            <div class="input-group-addon">mm</div>
-                        </div>
-                    </div>
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
+
+                    <table class="table" style="width:100%">
+                        <tr>
+                            <td class="text-nowrap" style="white-space: nowrap">Layer Height</td>
+                            <td align="right">
+                                <div class="input-group input-group-sm">
+                                    <input type="number" min="0" max="1.8" step="0.01" class="slicing-param slicing-param-layerHeight form-control" id="exampleInputAmount" placeholder="0.0" value="0.3">
+                                    <div class="input-group-addon">mm</div>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="text-nowrap" style="white-space: nowrap">Number of Perimeters</td>
+                            <td align="right">
+                                <div class="input-group input-group-sm">
+                                    <input type="number" min="1" max="99" step="1" class="slicing-param slicing-param-numPerimeters form-control" id="exampleInputAmount" placeholder="0.0" value="3">
+                                    <div class="input-group-addon">shells</div>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td class="text-nowrap table-condensed" style="white-space: nowrap">Infill Pattern</td>
+                            <td align="right">
+                                <select class="form-control slicing-param slicing-param-infillPattern input-sm" style="width:auto">
+                                    <option value="Honeycomb">Honeycomb</option>
+                                    <option value="Rectlinear" selected>Rectlinear</option>
+                                </select>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td class="text-nowrap" style="white-space: nowrap">Infill Percentage</td>
+                            <td align="right">
+                                <div class="input-group input-group-sm">
+                                    <input type="number" min="1" max="100" step="1" class="slicing-param slicing-param-infillPercentage form-control" id="exampleInputAmount" placeholder="0.0" value="30">
+                                    <div class="input-group-addon">%</div>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td class="text-nowrap" style="white-space: nowrap">Top Solid Layers</td>
+                            <td>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" min="1" max="100" step="1" class="slicing-param slicing-param-topLayers form-control" id="exampleInputAmount" placeholder="0.0" value="3">
+                                    <div class="input-group-addon">layers</div>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td class="text-nowrap" style="white-space: nowrap">Bottom Solid Layers</td>
+                            <td>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" min="1" max="100" step="1" class="slicing-param slicing-param-bottomLayers form-control" id="exampleInputAmount" placeholder="0.0" value="3">
+                                    <div class="input-group-addon">layers</div>
+                                </div>
+                            </td>
+                        </tr>
+
+
+
+
+
+
+                        <tr>
+                            <td class="text-nowrap" style="white-space: nowrap"> </td>
+                            <td align="right">
+
+                            </td>
+                        </tr>
+                        
+                        
+
+                    </table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                     <div class="checkbox">
                         <label>
@@ -127,7 +195,7 @@
                         <option value="Honeycomb">Honeycomb</option>
                         <option value="Rectlinear">Rectlinear</option>
                     </select>
-                    
+
                     <!--param end here-->
                 </div>
 

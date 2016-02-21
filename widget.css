@@ -11,3 +11,8 @@
 #com-chilipeppr-widget-stlViewer.hover {
     background-color: #428bca;
 }
+
+.input-group-addon {
+    min-width:50px;
+    text-align:left;
+}
