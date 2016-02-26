@@ -240,10 +240,10 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
         init: function() {
             console.log("I am being initted. Thanks.");
 
-            console.log('adding check: are we getting a defined callback from require: ', stlR );
+            console.log('adding check: are we getting a defined callback from require: ', stlR);
             console.log('and do we have the namespace:', MeshesJS);
-            
-            
+
+
             this.stlloader = new MeshesJS.STLLoader();
             console.log('and do we have the loader object, ', this.stlloader);
 
@@ -254,7 +254,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             //$('#com-chilipeppr-widget-stlViewer').click(this.loadChiliPepprGcode.bind(this));
 
             this.setupSlicingParamUI();
-            
+
             //this.setupParamsFromLocalStorage();
 
             this.setupDragDrop();
@@ -265,12 +265,21 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
             console.log("I am done being initted.");
         },
-        setupSlicingParamUI: function () {
+        setupSlicingParamUI: function() {
             var that = this;
-            
-            console.log ("paramElements:  ", this.paramElements);
-            
-            $('#' + that.id + ' .slicingParamTable').append (that.createHtmlElements (that.paramElements));
+
+            console.log("paramElements:  ", this.paramElements);
+
+            var paramTableHtmlString = "";
+            paramTableHtmlString += "<div class=\"panel panel-default\"> <div class=\"panel-heading\">Print Settings</div> <div class=\"panel-body\">";
+
+            paramTableHtmlString += that.createHtmlElements(that.paramElements.printSettings);
+
+            paramTableHtmlString += "</div>";
+
+
+
+            $('#' + that.id + ' .slicingParamTable').append(paramTableHtmlString);
             /*
             $.each(this.paramElements, function(index, elem) {
                 console.log("index:", index, "elem:", elem);
@@ -315,61 +324,58 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 
             });*/
         },
-        
+
         paramElements: {
-            /*
+
             printSettings: {
-                name: "Print Settings",
-                type:"escape"
-            },*/
-            
-            layerHeight: {
-                name: "Layer Height",
-                type: "number",
-                properties: "min=\"0.01\" max=\"1.8\" step=\"0.01\" value=\"0.3\"",
-                units: "mm",
-                defaultValue: 0.3
+                layerHeight: {
+                    name: "Layer Height",
+                    type: "number",
+                    properties: "min=\"0.01\" max=\"1.8\" step=\"0.01\" value=\"0.3\"",
+                    units: "mm",
+                    defaultValue: 0.3
+                },
+
+                numPerimeters: {
+                    name: "Number Perimeters",
+                    type: "number",
+                    properties: "min=\"1\" max=\"99\" step=\"1\" value=\"3\"",
+                    units: "shells",
+                    defaultValue: 3
+                },
+
+                infillPattern: {
+                    name: "Infill Pattern",
+                    type: "select",
+                    values: ["Honeycomb", "Rectlinear"],
+                    defaultValue: "Rectlinear"
+                },
+
+                infillPercentage: {
+                    name: "Infill Percentage",
+                    type: "number",
+                    properties: "min=\"1\" max=\"100\" step=\"1\" value=\"30\"",
+                    units: "%",
+                    defaultValue: 30
+                },
+
+                topLayers: {
+                    name: "Top Solid Layers",
+                    type: "number",
+                    properties: "min=\"1\" max=\"100\" step=\"1\" value=\"3\"",
+                    units: "layers",
+                    defaultValue: 3
+                },
+
+                bottomLayers: {
+                    name: "Bottom Solid Layers",
+                    type: "number",
+                    properties: "min=\"1\" max=\"100\" step=\"1\" value=\"3\"",
+                    units: "layers",
+                    defaultValue: 3
+                }
             },
-            
-            numPerimeters: {
-                name: "Number Perimeters",
-                type: "number",
-                properties: "min=\"1\" max=\"99\" step=\"1\" value=\"3\"",
-                units: "shells",
-                defaultValue: 3
-            },
-            
-            infillPattern: {
-                name: "Infill Pattern",
-                type: "select",
-                values: ["Honeycomb", "Rectlinear"],
-                defaultValue: "Rectlinear"
-            },
-            
-            infillPercentage: {
-                name: "Infill Percentage",
-                type: "number",
-                properties: "min=\"1\" max=\"100\" step=\"1\" value=\"30\"",
-                units: "%",
-                defaultValue: 30
-            },
-            
-            topLayers: {
-                name: "Top Solid Layers",
-                type: "number",
-                properties: "min=\"1\" max=\"100\" step=\"1\" value=\"3\"",
-                units: "layers",
-                defaultValue: 3
-            },
-            
-            bottomLayers: {
-                name: "Bottom Solid Layers",
-                type: "number",
-                properties: "min=\"1\" max=\"100\" step=\"1\" value=\"3\"",
-                units: "layers",
-                defaultValue: 3
-            },
-            
+
             firstLayerTemp: {
                 name: "First Layer Temp",
                 type: "number",
@@ -398,10 +404,10 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 units: "&#8451",
                 defaultValue: 200
             },
-            
-            
-            
-            
+
+
+
+
             printSpeed: {
                 name: "Print Speed",
                 type: "number",
@@ -409,7 +415,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 units: "mm/s",
                 defaultValue: 65
             },
-            
+
             travelSpeed: {
                 name: "Travel Speed",
                 type: "number",
@@ -417,7 +423,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 units: "mm/s",
                 defaultValue: 110
             },
-            
+
             firstLayerSpeed: {
                 name: "First Layer Speed",
                 type: "number",
@@ -425,148 +431,145 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 units: "mm/s",
                 defaultValue: 65
             },
-            
+
             generateSupport: {
                 name: "Generate Support",
                 type: "checkbox",
                 defaultValue: false
             },
-            
+
             spiralVaseMode: {
                 name: "Spiral Vase",
                 type: "checkbox",
                 defaultValue: false
             }
-            
-            
+
+
         },
-        
-        createHtmlElements: function (inputJSON) {
+
+        createHtmlElements: function(inputJSON) {
             var htmlString = "";
             $.each(inputJSON, function(index, elem) {
                 console.log("index:", index, "elem:", elem);
-                
+
                 htmlString += "<tr>";
                 htmlString += "<td class=\"text-nowrap\" style=\"white-space: nowrap\">" + elem.name + "</td>";
                 htmlString += "<td align=\"right\">";
-                
+
                 if (elem.type == "number") {
                     htmlString += "<div class=\"input-group input-group-sm\">";
-                    
+
                     htmlString += "<input type=\"number\" id=\"exampleInputAmount\" class=\"form-control slicing-param slicing-param-" + index + "\"" + elem.properties + ">";
                     htmlString += "<div class=\"input-group-addon\">" + elem.units + "</div>";
-                    
+
                     htmlString += "</div>";
                 }
                 else if (elem.type == "select") {
                     htmlString += "<select class=\"form-control slicing-param slicing-param-" + index + "\" input-sm\" style=\"width:auto\">";
-                    
+
                     // console.log ("dropdown values:  ", elem.values);
                     for (var i = 0; i < elem.values.length; i++) {
                         htmlString += "<option value=\"" + elem.values[i] + "\">" + elem.values[i] + "</option>";
                     }
-                    
+
                     htmlString += "</select>";
                 }
                 else if (elem.type == "checkbox") {
                     htmlString += "<label>";
-                    
+
                     htmlString += "<input class=\"slicing-param slicing-param-" + index + "\" input-sm\" type=\"checkbox\" value=\"\">";
-                    
-                    
+
+
                     htmlString += "</label>";
                 }
-                
+
                 htmlString += "</td>";
                 htmlString += "</tr>";
-                
+
             });
-            console.log ("htmlString:  ", htmlString);
+            console.log("htmlString:  ", htmlString);
             return (htmlString);
         },
-        
-        
-        setupSlicingParamUI_old: function () {
-            
+
+
+        setupSlicingParamUI_old: function() {
+
             // lets bind some onchange events
             var that = this;
             $('#' + this.id + ' .slicing-param').each(function(index, elem) {
-               console.log("index:", index, "elem:", elem);
-               var el = $(elem);
-               console.log("el: ", el);
-               el.change(that.onParamChange.bind(that));
-               
-               
-               var clsName = el.context.className; 
-               console.log ("clsName:  ", clsName);
-               
-               var defaultValue = el.context.defaultValue;
-               //console.log ("defaultValue:  ", defaultValue);
-               
-              that.selectedParams[that.getUniqueParamName(clsName)] = defaultValue;
+                console.log("index:", index, "elem:", elem);
+                var el = $(elem);
+                console.log("el: ", el);
+                el.change(that.onParamChange.bind(that));
+
+
+                var clsName = el.context.className;
+                console.log("clsName:  ", clsName);
+
+                var defaultValue = el.context.defaultValue;
+                //console.log ("defaultValue:  ", defaultValue);
+
+                that.selectedParams[that.getUniqueParamName(clsName)] = defaultValue;
             });
         },
         onParamChange: function(el, el2) {
-            console.log("got change on el:", el, el2);  
+            console.log("got change on el:", el, el2);
 
             // Extract the data we need from the passed object
-            var clsName = el.target.className;          //I added the $( ) wrapper around el b/c error el.attr is not a function
-            var value =  el.target.value;
-            var ticked = el.target.checked;             //looking through el to see what target contains checked
-            
-            
-            
-            console.log("clsName:  ", clsName, ' value: ', value, ' ticked: ', ticked);         //clsName returns the classes (all of them) now
-            
+            var clsName = el.target.className; //I added the $( ) wrapper around el b/c error el.attr is not a function
+            var value = el.target.value;
+            var ticked = el.target.checked; //looking through el to see what target contains checked
+
+
+
+            console.log("clsName:  ", clsName, ' value: ', value, ' ticked: ', ticked); //clsName returns the classes (all of them) now
+
             var valueToWrite;
-            if (!value)
-            {
+            if (!value) {
                 //console.log ("Not value.  ticked: ", ticked);
-                valueToWrite = ticked;  //set valueToWrite to checkbox value
+                valueToWrite = ticked; //set valueToWrite to checkbox value
                 //may need to convert bool to string .ToString()
             }
-            else 
+            else
                 valueToWrite = value;
-            
-            console.log ("valueToWrite:  ", valueToWrite);
-            
-            
+
+            console.log("valueToWrite:  ", valueToWrite);
+
+
             this.selectedParams[this.getUniqueParamName(clsName)] = valueToWrite;
-            
-            console.log ("selectedParams:  ", this.selectedParams);
-            
+
+            console.log("selectedParams:  ", this.selectedParams);
+
             //localStorage.setItem(this.id + "param");
             this.saveParamsLocalStorage();
         },
         selectedParams: {
-            testval:  "Duck Development Done!"
-            //layerHeight: 0.3,
-            //infillPattern: "Rectlinear"
+            testval: "Duck Development Done!"
+                //layerHeight: 0.3,
+                //infillPattern: "Rectlinear"
         },
-        getUniqueParamName: function (input) {
+        getUniqueParamName: function(input) {
             var regExPattern = /slicing-param-[a-zA-Z]+/;
             var regExpResult = input.match(regExPattern);
             var regExpResultAsString = regExpResult[0];
-            
-            regExpResultAsString=regExpResultAsString.replace('slicing-param-', '');
-            
+
+            regExpResultAsString = regExpResultAsString.replace('slicing-param-', '');
+
             return regExpResultAsString;
         },
-        combineInputDataTypes: function (value, ticked) {
+        combineInputDataTypes: function(value, ticked) {
             var valueToWrite;
-            if (!value)
-            {
+            if (!value) {
                 //console.log ("Not value.  ticked: ", ticked);
-                valueToWrite = ticked;  //set valueToWrite to checkbox value
+                valueToWrite = ticked; //set valueToWrite to checkbox value
                 //may need to convert bool to string .ToString()
             }
-            else
-            {
+            else {
                 valueToWrite = value;
             }
             return valueToWrite;
         },
-        
+
         setupParamsFromLocalStorage: function() {
 
             // Read vals from localStorage. Make sure to use a unique
@@ -577,36 +580,36 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             // Feel free to add your own keys inside the options 
             // object for your own items
             var that = this;
-            
+
             var defaultParams = this.selectedParams;
             defaultParams.infillPattern = "Rectlinear";
-            console.log ("Default Params:  ", defaultParams);
-            
+            console.log("Default Params:  ", defaultParams);
+
             var options = localStorage.getItem(this.id + '-params');
             if (options) {
                 options = $.parseJSON(options);
                 options.catchMe = "gotcha!";
                 console.log("just evaled params: ", options);
-                
+
                 //forEach param, if the key exists in selectedParams this means it is a needed key
                 //then replace the key with this one. then update html?  
                 $.each(options, function(key, value) {
                     //key = JSON.stringify(key);
-                    console.log('Debug:  Key = ', key);  //, So KEY contains the NAME of the key (value)
+                    console.log('Debug:  Key = ', key); //, So KEY contains the NAME of the key (value)
                     var defKey = defaultParams[key]; // but defaultparams.(.....) you want the ... to be the substituted name? (i.e insert key here)
-                    console.log ("key:  ", key, " value:  ", value, "defKey:  ", defKey);
+                    console.log("key:  ", key, " value:  ", value, "defKey:  ", defKey);
                     if (defaultParams.key != null) {
-                    // if (typeof(defaultParams.key) !== 'undefined') {
-                        console.log ("do: ", key);
+                        // if (typeof(defaultParams.key) !== 'undefined') {
+                        console.log("do: ", key);
                     }
                     else
-                        console.log ("Caught: ", key);
-                    
+                        console.log("Caught: ", key);
+
                 });
-                
-                
+
+
             }
-            
+
             // this.options.tabShowing
 
             //this.options = options;
@@ -628,7 +631,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             // store settings to localStorage
             localStorage.setItem(this.id + '-params', optionsStr);
         },
-        
+
 
         testCube: function() {
             var geometry = new THREE.BoxGeometry(10, 10, 10);
@@ -641,7 +644,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             var edges = new THREE.EdgesHelper(cube, 0x000000);
 
             this.sceneAdd(cube);
-            this.sceneAdd (edges);
+            this.sceneAdd(edges);
         },
 
         /**
@@ -686,7 +689,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 // Make sure popover is immediately hidden
                 $('#' + that.id + ' .btn-sayhello').popover("hide");
                 // Show a flash msg
-                
+
                 chilipeppr.publish(
                     "/com-chilipeppr-elem-flashmsg/flashmsg",
                     "Slicer Params",
@@ -749,7 +752,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     customParam2: 1.0
                 };
             }
-            
+
             // this.options.tabShowing
 
             this.options = options;
@@ -1017,9 +1020,9 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
         //begin self dragdrop functions
         bind: function(dropDomElemSelector, txtDomElemSelector) {
-            
+
             var that = this;
-            
+
             // Create drag and drop
             //dropArea = $('.dropArea');
             this.dropArea = $(dropDomElemSelector);
@@ -1049,55 +1052,54 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
                     return false;
                 },
-                
+
                 drop: function(e) {
-                    
+
                     $(this).removeClass('hover');
                     $(".com-chilipeppr-elem-dragdrop").removeClass('hover');
                     //$(".com-chilipeppr-elem-dragdrop").popover('hide');
                     //chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondragleave", "");
-            
+
                     e = e || window.event;
                     e.preventDefault();
-                            
-                                
+
+
                     // jQuery wraps the originalEvent, so we try to detect that here...
                     e = e.originalEvent || e;
                     //console.log(e);
-            
+
                     // Using e.files with fallback because e.dataTransfer is immutable and can't be overridden in Polyfills (http://sandbox.knarly.com/js/dropfiles/).            
                     var files = (e.files || e.dataTransfer.files);
                     //console.log(files);
-              
-              
+
+
                     $(this).removeClass('hover');
                     $(".com-chilipeppr-elem-dragdrop").removeClass('hover');
                     //$(".com-chilipeppr-elem-dragdrop").popover('hide');
                     //chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondragleave", "");
-                    
+
                     console.log("Files dropped: ", files);
 
                     for (var i = 0; i < files.length; i++) {
-                        console.log('Loading STL no ', i);  
-                        $('#stlFileNames > tbody:last-child').append('<tr id="tr'+[i]+'"><td>'+[i]+'</td><td>'+files[i].name+'</td></tr>');
+                        console.log('Loading STL no ', i);
+                        $('#stlFileNames > tbody:last-child').append('<tr id="tr' + [i] + '"><td>' + [i] + '</td><td>' + files[i].name + '</td></tr>');
                         (function(i) {
                             // parse binary STL
                             console.log('But do we have a loader?', that.stlloader);
                             console.log("what does loadFile look like?", that.stlloader.loadFile);
                             that.stlloader.loadFile(files[i], i);
-                            console.log('After Loadfile no ', i);                    
-                            }
-                        )(i);
-                        
-                
-                        
+                            console.log('After Loadfile no ', i);
+                        })(i);
+
+
+
                     }
-                        
-                        
-                        return false;
-                    },
-            
-                    
+
+
+                    return false;
+                },
+
+
                 dropold: function(e) {
                     $(this).removeClass('hover');
                     $(".com-chilipeppr-elem-dragdrop").removeClass('hover');
@@ -1106,9 +1108,9 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
                     e = e || window.event;
                     e.preventDefault();
-                    
-                    
-                    
+
+
+
                     // jQuery wraps the originalEvent, so we try to detect that here...
                     e = e.originalEvent || e;
                     //console.log(e);
@@ -1125,12 +1127,12 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                             //console.log(files[i]);
                             //var thefile = files[i];
                             reader.onload = function(event) {
-                  
-                                      
-                                
+
+
+
                                 var data = this.result
-                            //  console.log('Raw filereader result:  ', data);
-                            
+                                    //  console.log('Raw filereader result:  ', data);
+
                                 //console.log(event);
                                 //console.log(event.target.result);
                                 //console.log(event.target.result);
@@ -1168,7 +1170,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                                     "</div>", 1000 * 3, true);*/
                             };
                             //reader.readAsDataURL(files[i]);
-            
+
                             // var fileExtension = files[i].name.split();
                             var fileExtension = files[i].name.substr(files[i].name.lastIndexOf('.') + 1);
 
@@ -1176,20 +1178,20 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
                             if (fileExtension.match(/stl/g)) {
                                 console.log("We have an STL file.  Read as Array Buffer");
-                                 reader.readAsBinaryString(files[i]);
+                                reader.readAsBinaryString(files[i]);
                                 //chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondroppedSTL", files[i]);
-                                
+
                                 //that.parseStlBinary (files[i] );
-                                
-                                console.log ("files[i]:  ", files[i] );
-                                
-                                console.log ("result ",  this.result);
-                                
+
+                                console.log("files[i]:  ", files[i]);
+
+                                console.log("result ", this.result);
+
                                 //var convertedBuffer = (that.arrayBufferToString (reader.result) );
-                                
+
                                 //console.log ("convertedBuffer ",  convertedBuffer);
-                                
-                                
+
+
                             }
                             else {
                                 reader.readAsText(files[i]);
@@ -1204,7 +1206,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             // end drop area code
         },
         //end self dragdrop functions
-        
+
 
         //end reader functions
 
@@ -1232,7 +1234,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             return result;
 
         },*/
-        
+
         //start stl parsing functions
         parseStlBinary: function(stl) { //this is from jsstl.  we have a failure on the new DataView
             var geo = new THREE.Geometry();
