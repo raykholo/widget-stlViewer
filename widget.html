@@ -91,14 +91,46 @@
                 <!-- Tab 2 -->
                 <div class="tab-pane active" id="com-chilipeppr-widget-stlViewer-tab2">
                     <br/>
-                    <p>Select your slicing parameters:</p>
+                    <!--<p>Select your slicing parameters:</p>-->
                     <!--param start here-->
-                    <!--<div class="slicingParamTable"> </div>-->
-                    <table class="table slicingParamTable" style="width:100%">
+                    <div class="slicingParamForm" style="border: 0">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li class="active"><a href="#com-chilipeppr-widget-stlViewer-paramPrintSettings" role="tab" data-toggle="tab">Print Settings</a></li>
+                            <li><a href="#com-chilipeppr-widget-stlViewer-paramFilamentSettings" role="tab" data-toggle="tab">Material</a></li>
+                            <li><a href="#com-chilipeppr-widget-stlViewer-paramMachineSettings" role="tab" data-toggle="tab">Machine</a></li>
+                        </ul>
+
+
+
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="com-chilipeppr-widget-stlViewer-paramPrintSettings">
+                                <table class="table slicingParamTablePrintSettings" style="width:100%">
+                                    
+                                </table>
+                            </div>
+
+                            <div class="tab-pane" id="com-chilipeppr-widget-stlViewer-paramFilamentSettings">
+                                <table class="table slicingParamTableFilamentSettings" style="width:100%">
+                                    
+                                </table>
+                            </div>
+
+                            <div class="tab-pane" id="com-chilipeppr-widget-stlViewer-paramMachineSettings">
+                                <table class="table slicingParamTableMachineSettings" style="width:100%">
+                                    
+                                </table>
+                            </div>
+
+                        </div>
                         
-                    </table>
-                    
-                    
+                        
+                    </div>
+
+                    <!--<table class="table slicingParamTable" style="width:100%">
+
+                    </table>-->
+
+
                     <!--
                     <table class="table" style="width:100%">
                         <tr>
@@ -204,8 +236,8 @@
 
                     <!--param end here-->
                 </div>
-                
-                
+
+
                 <!-- Tab 3 -->
                 <div class="tab-pane" id="com-chilipeppr-widget-stlViewer-tab3">
                     <p>This is the content of tab 3.</p>

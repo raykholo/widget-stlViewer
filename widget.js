@@ -234,15 +234,18 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             
 
             var paramTableHtmlString = "";
-            paramTableHtmlString += "<div class=\"panel panel-default\"> <div class=\"panel-heading\">Print Settings</div> <div class=\"panel-body\">";
+            //paramTableHtmlString += "<div class=\"panel panel-default\"> <div class=\"panel-heading\">Print Settings</div> <div class=\"panel-body\">";
 
             paramTableHtmlString += that.createHtmlElements(that.paramElements.printSettings);
 
-            paramTableHtmlString += "</div>";
+            //paramTableHtmlString += "</div>";
 
-
-
-            $('#' + that.id + ' .slicingParamTable').append(paramTableHtmlString);
+            $('#' + that.id + ' .slicingParamTablePrintSettings').append(paramTableHtmlString);
+            
+            paramTableHtmlString = "";
+            
+            
+            
             
             
 
