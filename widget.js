@@ -127,7 +127,7 @@ cprequire_test(["inline:com-chilipeppr-widget-stlViewer"], function(myWidget) {
         });
 
     // init my widget
-    myWidget.init();
+    //myWidget.init();
     $('#' + myWidget.id).css('margin', '10px');
     $('title').html(myWidget.name);
 
@@ -217,7 +217,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
             this.setupSlicingParamUI();
             
-            this.setupParamsFromLocalStorage();
+            //this.setupParamsFromLocalStorage();
 
             this.setupDragDrop();
 
@@ -227,8 +227,147 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
             console.log("I am done being initted.");
         },
-        
         setupSlicingParamUI: function () {
+            var that = this;
+            
+            console.log ("paramElements:  ", this.paramElements);
+            
+            $.each(this.paramElements, function(index, elem) {
+                console.log("index:", index, "elem:", elem);
+                
+                var htmlString = "";
+                htmlString += "<tr>";
+                htmlString += "<td class=\"text-nowrap\" style=\"white-space: nowrap\">" + elem.name + "</td>";
+                htmlString += "<td align=\"right\">";
+                
+                if (elem.type == "number") {
+                    htmlString += "<div class=\"input-group input-group-sm\">";
+                    
+                    htmlString += "<input type=\"number\" id=\"exampleInputAmount\" class=\"form-control slicing-param slicing-param-" + index + "\"" + elem.properties + ">";
+                    htmlString += "<div class=\"input-group-addon\">" + elem.units + "</div>";
+                    
+                    htmlString += "</div>";
+                }
+                else if (elem.type == "select") {
+                    htmlString += "<select class=\"form-control slicing-param slicing-param-" + index + "\" input-sm\" style=\"width:auto\">";
+                    
+                    // console.log ("dropdown values:  ", elem.values);
+                    for (var i = 0; i < elem.values.length; i++) {
+                        htmlString += "<option value=\"" + elem.values[i] + "\">" + elem.values[i] + "</option>";
+                    }
+                    
+                    htmlString += "</select>";
+                }
+                else if (elem.type == "checkbox") {
+                    htmlString += "<label>";
+                    
+                    htmlString += "<input class=\"slicing-param slicing-param-" + index + "\" input-sm\" type=\"checkbox\" value=\"\">";
+                    
+                    
+                    htmlString += "</label>"
+                }
+                
+                htmlString += "</td>";
+                htmlString += "</tr>";
+                console.log ("htmlString:  ", htmlString);
+                
+                $('#' + that.id + ' .slicingParamTable').append (htmlString);
+                
+            });
+        },
+        
+        paramElements: {
+            layerHeight: {
+                name: "Layer Height",
+                type: "number",
+                properties: "min=\"0.01\" max=\"1.8\" step=\"0.01\" value=\"0.3\"",
+                units: "mm",
+                defaultValue: 0.3
+            },
+            
+            numPerimeters: {
+                name: "Number Perimeters",
+                type: "number",
+                properties: "min=\"1\" max=\"99\" step=\"1\" value=\"3\"",
+                units: "shells",
+                defaultValue: 3
+            },
+            
+            infillPattern: {
+                name: "Infill Pattern",
+                type: "select",
+                values: ["Honeycomb", "Rectlinear"],
+                defaultValue: "Rectlinear"
+            },
+            
+            infillPercentage: {
+                name: "Infill Percentage",
+                type: "number",
+                properties: "min=\"1\" max=\"100\" step=\"1\" value=\"30\"",
+                units: "%",
+                defaultValue: 30
+            },
+            
+            topLayers: {
+                name: "Top Solid Layers",
+                type: "number",
+                properties: "min=\"1\" max=\"100\" step=\"1\" value=\"3\"",
+                units: "layers",
+                defaultValue: 3
+            },
+            
+            bottomLayers: {
+                name: "Bottom Solid Layers",
+                type: "number",
+                properties: "min=\"1\" max=\"100\" step=\"1\" value=\"3\"",
+                units: "layers",
+                defaultValue: 3
+            },
+            
+            
+            
+            
+            printSpeed: {
+                name: "Print Speed",
+                type: "number",
+                properties: "min=\"1\" max=\"300\" step=\"1\" value=\"65\"",
+                units: "mm/s",
+                defaultValue: 65
+            },
+            
+            travelSpeed: {
+                name: "Travel Speed",
+                type: "number",
+                properties: "min=\"1\" max=\"300\" step=\"1\" value=\"110\"",
+                units: "mm/s",
+                defaultValue: 110
+            },
+            
+            firstLayerSpeed: {
+                name: "First Layer Speed",
+                type: "number",
+                properties: "min=\"1\" max=\"300\" step=\"1\" value=\"65\"",
+                units: "mm/s",
+                defaultValue: 65
+            },
+            
+            generateSupport: {
+                name: "Generate Support",
+                type: "checkbox",
+                defaultValue: false
+            },
+            
+            spiralVaseMode: {
+                name: "Spiral Vase",
+                type: "checkbox",
+                defaultValue: false
+            }
+            
+            
+        },
+        
+        
+        setupSlicingParamUI_old: function () {
             
             // lets bind some onchange events
             var that = this;
