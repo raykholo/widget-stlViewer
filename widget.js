@@ -231,6 +231,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             var that = this;
 
             console.log("paramElements:  ", this.paramElements);
+            
 
             var paramTableHtmlString = "";
             paramTableHtmlString += "<div class=\"panel panel-default\"> <div class=\"panel-heading\">Print Settings</div> <div class=\"panel-body\">";
@@ -242,49 +243,9 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
 
             $('#' + that.id + ' .slicingParamTable').append(paramTableHtmlString);
-            /*
-            $.each(this.paramElements, function(index, elem) {
-                console.log("index:", index, "elem:", elem);
-                
-                var htmlString = "";
-                htmlString += "<tr>";
-                htmlString += "<td class=\"text-nowrap\" style=\"white-space: nowrap\">" + elem.name + "</td>";
-                htmlString += "<td align=\"right\">";
-                
-                if (elem.type == "number") {
-                    htmlString += "<div class=\"input-group input-group-sm\">";
-                    
-                    htmlString += "<input type=\"number\" id=\"exampleInputAmount\" class=\"form-control slicing-param slicing-param-" + index + "\"" + elem.properties + ">";
-                    htmlString += "<div class=\"input-group-addon\">" + elem.units + "</div>";
-                    
-                    htmlString += "</div>";
-                }
-                else if (elem.type == "select") {
-                    htmlString += "<select class=\"form-control slicing-param slicing-param-" + index + "\" input-sm\" style=\"width:auto\">";
-                    
-                    // console.log ("dropdown values:  ", elem.values);
-                    for (var i = 0; i < elem.values.length; i++) {
-                        htmlString += "<option value=\"" + elem.values[i] + "\">" + elem.values[i] + "</option>";
-                    }
-                    
-                    htmlString += "</select>";
-                }
-                else if (elem.type == "checkbox") {
-                    htmlString += "<label>";
-                    
-                    htmlString += "<input class=\"slicing-param slicing-param-" + index + "\" input-sm\" type=\"checkbox\" value=\"\">";
-                    
-                    
-                    htmlString += "</label>";
-                }
-                
-                htmlString += "</td>";
-                htmlString += "</tr>";
-                console.log ("htmlString:  ", htmlString);
-                
-                $('#' + that.id + ' .slicingParamTable').append (htmlString);
-                
-            });*/
+            
+            
+
         },
 
         paramElements: {
@@ -335,78 +296,92 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     properties: "min=\"1\" max=\"100\" step=\"1\" value=\"3\"",
                     units: "layers",
                     defaultValue: 3
+                },
+                printSpeed: {
+                    name: "Print Speed",
+                    type: "number",
+                    properties: "min=\"1\" max=\"300\" step=\"1\" value=\"65\"",
+                    units: "mm/s",
+                    defaultValue: 65
+                },
+
+                travelSpeed: {
+                    name: "Travel Speed",
+                    type: "number",
+                    properties: "min=\"1\" max=\"300\" step=\"1\" value=\"110\"",
+                    units: "mm/s",
+                    defaultValue: 110
+                },
+
+                firstLayerSpeed: {
+                    name: "First Layer Speed",
+                    type: "number",
+                    properties: "min=\"1\" max=\"300\" step=\"1\" value=\"65\"",
+                    units: "mm/s",
+                    defaultValue: 65
+                },
+
+                generateSupport: {
+                    name: "Generate Support",
+                    type: "checkbox",
+                    defaultValue: false
+                },
+
+                spiralVaseMode: {
+                    name: "Spiral Vase",
+                    type: "checkbox",
+                    defaultValue: false
+                }
+
+            },
+            filamentSettings: {
+                firstLayerTemp: {
+                    name: "First Layer Temp",
+                    type: "number",
+                    properties: "min=\"1\" max=\"1000\" step=\"1\" value=\"200\"",
+                    units: "&#8451",
+                    defaultValue: 200
+                },
+                otherLayerTemp: {
+                    name: "Other Layer Temp",
+                    type: "number",
+                    properties: "min=\"1\" max=\"1000\" step=\"1\" value=\"200\"",
+                    units: "&#8451",
+                    defaultValue: 200
+                },
+                firstLayerBedTemp: {
+                    name: "First Layer Bed",
+                    type: "number",
+                    properties: "min=\"1\" max=\"1000\" step=\"1\" value=\"200\"",
+                    units: "&#8451",
+                    defaultValue: 200
+                },
+                otherLayerBedTemp: {
+                    name: "Other Layer Bed",
+                    type: "number",
+                    properties: "min=\"1\" max=\"1000\" step=\"1\" value=\"200\"",
+                    units: "&#8451",
+                    defaultValue: 200
                 }
             },
-
-            firstLayerTemp: {
-                name: "First Layer Temp",
-                type: "number",
-                properties: "min=\"1\" max=\"1000\" step=\"1\" value=\"200\"",
-                units: "&#8451",
-                defaultValue: 200
-            },
-            otherLayerTemp: {
-                name: "Other Layer Temp",
-                type: "number",
-                properties: "min=\"1\" max=\"1000\" step=\"1\" value=\"200\"",
-                units: "&#8451",
-                defaultValue: 200
-            },
-            firstLayerBedTemp: {
-                name: "First Layer Bed",
-                type: "number",
-                properties: "min=\"1\" max=\"1000\" step=\"1\" value=\"200\"",
-                units: "&#8451",
-                defaultValue: 200
-            },
-            otherLayerBedTemp: {
-                name: "Other Layer Bed",
-                type: "number",
-                properties: "min=\"1\" max=\"1000\" step=\"1\" value=\"200\"",
-                units: "&#8451",
-                defaultValue: 200
-            },
-
-
-
-
-            printSpeed: {
-                name: "Print Speed",
-                type: "number",
-                properties: "min=\"1\" max=\"300\" step=\"1\" value=\"65\"",
-                units: "mm/s",
-                defaultValue: 65
-            },
-
-            travelSpeed: {
-                name: "Travel Speed",
-                type: "number",
-                properties: "min=\"1\" max=\"300\" step=\"1\" value=\"110\"",
-                units: "mm/s",
-                defaultValue: 110
-            },
-
-            firstLayerSpeed: {
-                name: "First Layer Speed",
-                type: "number",
-                properties: "min=\"1\" max=\"300\" step=\"1\" value=\"65\"",
-                units: "mm/s",
-                defaultValue: 65
-            },
-
-            generateSupport: {
-                name: "Generate Support",
-                type: "checkbox",
-                defaultValue: false
-            },
-
-            spiralVaseMode: {
-                name: "Spiral Vase",
-                type: "checkbox",
-                defaultValue: false
+            machineSettings: {
+                bedSizeX: {
+                    name: "Bed Size X",
+                    type: "number",
+                    properties: "min=\"1\" max=\"2000\" step=\"1\" value=\"200\"",
+                    units: "mm/s",
+                    defaultValue: 200
+                },
+                bedSizeY: {
+                    name: "Bed Size X",
+                    type: "number",
+                    properties: "min=\"1\" max=\"2000\" step=\"1\" value=\"200\"",
+                    units: "mm/s",
+                    defaultValue: 200
+                }
             }
-
-
+            
+            
         },
 
         createHtmlElements: function(inputJSON) {
@@ -506,9 +481,9 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             this.saveParamsLocalStorage();
         },
         selectedParams: {
-            testval: "Duck Development Done!"
-                //layerHeight: 0.3,
-                //infillPattern: "Rectlinear"
+            //testval: "Duck Development Done!"
+            //layerHeight: 0.3,
+            //infillPattern: "Rectlinear"
         },
         getUniqueParamName: function(input) {
             var regExPattern = /slicing-param-[a-zA-Z]+/;
