@@ -809,7 +809,8 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             var settings = {
                 "async": true,
                 "crossDomain": true,
-                "url": "http://mockbin.org/bin/390b962c-e678-4e15-acee-74510d881057?foo=bar&foo=baz",
+                //"url": "http://mockbin.org/bin/390b962c-e678-4e15-acee-74510d881057?foo=bar&foo=baz",
+                "url": "http://mockbin.org/bin/93071bc3-e3bd-4424-bd11-1ac27e08c32c?foo=bar&foo=baz",
                 "method": "POST",
                 "headers": {
                     "cookie": "foo=bar; bar=baz",
