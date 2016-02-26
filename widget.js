@@ -216,8 +216,8 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             //$('#com-chilipeppr-widget-stlViewer').click(this.loadChiliPepprGcode.bind(this));
 
             this.setupSlicingParamUI();
-
-            //this.setupParamsFromLocalStorage();
+            this.bindSlicingParam();
+            this.setupParamsFromLocalStorage();
 
             this.setupDragDrop();
 
@@ -231,23 +231,25 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             var that = this;
 
             console.log("paramElements:  ", this.paramElements);
-            
+
 
             var paramTableHtmlString = "";
-            //paramTableHtmlString += "<div class=\"panel panel-default\"> <div class=\"panel-heading\">Print Settings</div> <div class=\"panel-body\">";
-
             paramTableHtmlString += that.createHtmlElements(that.paramElements.printSettings);
-
-            //paramTableHtmlString += "</div>";
-
             $('#' + that.id + ' .slicingParamTablePrintSettings').append(paramTableHtmlString);
-            
+
+
             paramTableHtmlString = "";
-            
-            
-            
-            
-            
+            paramTableHtmlString += that.createHtmlElements(that.paramElements.filamentSettings);
+            $('#' + that.id + ' .slicingParamTableFilamentSettings').append(paramTableHtmlString);
+
+            paramTableHtmlString = "";
+            paramTableHtmlString += that.createHtmlElements(that.paramElements.machineSettings);
+            $('#' + that.id + ' .slicingParamTableMachineSettings').append(paramTableHtmlString);
+
+
+
+
+
 
         },
 
@@ -274,7 +276,8 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     name: "Infill Pattern",
                     type: "select",
                     values: ["Honeycomb", "Rectlinear"],
-                    defaultValue: "Rectlinear"
+                    // defaultValue: "Rectlinear"
+                    defaultValue: "Honeycomb"
                 },
 
                 infillPercentage: {
@@ -338,6 +341,20 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
             },
             filamentSettings: {
+                filamentDiameter: {
+                    name: "Filament Diameter",
+                    type: "number",
+                    properties: "min=\"0.01\" max=\"10\" step=\".01\" value=\"1.7\"",
+                    units: "mm",
+                    defaultValue: 1.7
+                },
+                extrusionMultiplier: {
+                    name: "Extrusion Multiplier",
+                    type: "number",
+                    properties: "min=\"0.01\" max=\"10\" step=\".01\" value=\"1\"",
+                    units: "<b>x</b>",
+                    defaultValue: 1
+                },
                 firstLayerTemp: {
                     name: "First Layer Temp",
                     type: "number",
@@ -368,26 +385,45 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 }
             },
             machineSettings: {
+                nozzleDiameter: {
+                    name: "Nozzle Diameter",
+                    type: "number",
+                    properties: "min=\"0.1\" max=\"10\" step=\".01\" value=\"0.4\"",
+                    units: "mm",
+                    defaultValue: 200
+                },
                 bedSizeX: {
                     name: "Bed Size X",
                     type: "number",
                     properties: "min=\"1\" max=\"2000\" step=\"1\" value=\"200\"",
-                    units: "mm/s",
+                    units: "mm",
                     defaultValue: 200
                 },
                 bedSizeY: {
-                    name: "Bed Size X",
+                    name: "Bed Size Y",
                     type: "number",
                     properties: "min=\"1\" max=\"2000\" step=\"1\" value=\"200\"",
-                    units: "mm/s",
+                    units: "mm",
                     defaultValue: 200
+                },
+
+                startGcode: {
+                    name: "Start Gcode",
+                    type: "textarea",
+                    defaultValue: "G28 ; home all axes\n;G1 Z5 F5000 ; lift nozzle"
+                },
+                endGcode: {
+                    name: "End Gcode",
+                    type: "textarea",
+                    defaultValue: "M104 S0 ; turn off temperature\nM140 S0\nG28 X0  ; home X axis\nM84     ; disable motors"
                 }
             }
-            
-            
+
+
         },
 
-        createHtmlElements: function(inputJSON) {
+        createHtmlElements: function(inputJSON) { //jQuery is fun
+            var that = this;
             var htmlString = "";
             $.each(inputJSON, function(index, elem) {
                 console.log("index:", index, "elem:", elem);
@@ -423,6 +459,13 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     htmlString += "</label>";
                 }
 
+                else if (elem.type == "textarea") {
+                    htmlString += "<textarea rows=\"4\" cols=\"20\" class=\"form-control slicing-param slicing-param-" + index + "\" style=\"max-width:300px; max-height:300px\">"; //style=\"resize: none\"
+                    htmlString += elem.defaultValue;
+                    htmlString += "</textarea>";
+
+                }
+
                 htmlString += "</td>";
                 htmlString += "</tr>";
 
@@ -432,7 +475,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
         },
 
 
-        setupSlicingParamUI_old: function() {
+        bindSlicingParam: function() {
 
             // lets bind some onchange events
             var that = this;
@@ -483,11 +526,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             //localStorage.setItem(this.id + "param");
             this.saveParamsLocalStorage();
         },
-        selectedParams: {
-            //testval: "Duck Development Done!"
-            //layerHeight: 0.3,
-            //infillPattern: "Rectlinear"
-        },
+        selectedParams: {},
         getUniqueParamName: function(input) {
             var regExPattern = /slicing-param-[a-zA-Z]+/;
             var regExpResult = input.match(regExPattern);
@@ -509,8 +548,111 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             }
             return valueToWrite;
         },
-
         setupParamsFromLocalStorage: function() {
+            var that = this;
+
+            var options = localStorage.getItem(this.id + '-params');
+            if (options) {
+                // if (true) {
+                options = $.parseJSON(options);
+                //options.catchMe = "gotcha!"; //for testing
+                console.log("just evaled params: ", options);
+
+                $.each(that.paramElements, function(key, value) {
+                    console.log("level 1. key:  ", key, " value:  ", value);
+
+                    $.each(value, function(key2, value2) {
+                        console.log("level 2. key:  ", key2, " value:  ", value2, "options.key: ", options[key2]);
+
+                        if ((options[key2] == value2.defaultValue) || (options[key2] == undefined)) { //FIXED:  think I need to add case that particular key does not exist. 
+                            console.log("default match!");
+
+                            that.selectedParams[key2] = value2.defaultValue;
+
+
+
+                            /*
+                            var elemName = '#' + that.id + " .slicing-param-" + key2;
+                            console.log("Recreated html class: ", elemName);
+
+                            if (value2.type == "select") {
+                                console.log("prop for select");
+                                //var valToWrite = that.selectedParams[key2];
+                                $(elemName).val(that.selectedParams[key2]).prop('selected', true);
+                            }
+                            else {
+                                $(elemName).val(that.selectedParams[key2]);
+                            }*/
+
+
+                        }
+                        else { //defaultValue does not equal stored value, but storedValue exists.  Use storedValue
+                            console.log("overwriting default:  ");
+
+                            that.selectedParams[key2] = options[key2];
+
+                            var elemName = '#' + that.id + " .slicing-param-" + key2;
+                            console.log("Recreated html class: ", elemName);
+                            /*
+                            var valToWrite;
+                            
+                            if (value2.type == "number") {
+                                console.log ("type = number");
+                                valToWrite = parseInt (value, 10);
+                            }*/
+                            if (value2.type == "select") {
+                                console.log("prop for select");
+                                //var valToWrite = that.selectedParams[key2];
+                                $(elemName).val(that.selectedParams[key2]).prop('selected', true);
+                            }
+                            else {
+                                $(elemName).val(that.selectedParams[key2]);
+                            }
+
+                        }
+
+
+
+                    });
+
+
+
+                });
+                console.log("done checking stored Params, selectedParams now updated:  ", that.selectedParams);
+
+
+            }
+            else {
+                console.log("param first load");
+                
+                
+                $('#' + this.id + ' .slicing-param').each(function(index, elem) {
+                    console.log("index:", index, "elem:", elem);
+                    var el = $(elem);
+                    //console.log("el: ", el);
+                    // el.change(that.onParamChange.bind(that));
+
+
+                    var clsName = el.context.className;
+                    //console.log("clsName:  ", clsName);
+
+                    var defaultValue = el.context.defaultValue;
+                    //console.log ("defaultValue:  ", defaultValue);
+
+                    //that.selectedParams[that.getUniqueParamName(clsName)] = defaultValue;
+                    
+                    
+                    
+                    
+                });
+
+
+            }
+
+        },
+
+
+        setupParamsFromLocalStorage_old: function() { //this func doesn't work yet. 
 
             // Read vals from localStorage. Make sure to use a unique
             // key specific to this widget so as not to overwrite other
@@ -522,25 +664,35 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             var that = this;
 
             var defaultParams = this.selectedParams;
-            defaultParams.infillPattern = "Rectlinear";
+            //defaultParams.infillPattern = "Rectlinear";
             console.log("Default Params:  ", defaultParams);
 
             var options = localStorage.getItem(this.id + '-params');
             if (options) {
                 options = $.parseJSON(options);
-                options.catchMe = "gotcha!";
+                options.catchMe = "gotcha!"; //for testing
                 console.log("just evaled params: ", options);
 
                 //forEach param, if the key exists in selectedParams this means it is a needed key
                 //then replace the key with this one. then update html?  
                 $.each(options, function(key, value) {
                     //key = JSON.stringify(key);
-                    console.log('Debug:  Key = ', key); //, So KEY contains the NAME of the key (value)
+                    //console.log('Debug:  Key = ', key); //, So KEY contains the NAME of the key (value)
                     var defKey = defaultParams[key]; // but defaultparams.(.....) you want the ... to be the substituted name? (i.e insert key here)
                     console.log("key:  ", key, " value:  ", value, "defKey:  ", defKey);
-                    if (defaultParams.key != null) {
+                    //if (defaultParams.key != null) {
+                    if (defaultParams.hasOwnProperty(key)) { //key exists in json. Let's have some fun.
                         // if (typeof(defaultParams.key) !== 'undefined') {
                         console.log("do: ", key);
+
+                        var elemName = '#' + that.id + " .slicing-param-" + key;
+                        console.log("Recreated html class: ", elemName);
+
+                        $(elemName).val(value);
+
+                        console.log("that.selectedParams.key:  ", that.selectedParams[key]);
+                        //that.selectedParams.key = value;
+
                     }
                     else
                         console.log("Caught: ", key);
@@ -638,12 +790,21 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 );
             });
 
+            $('#' + this.id + ' .btn-resetParams').click(this.onResetParamBtnClick.bind(this));
+
+
             // Init Hello World 2 button on Tab 1. Notice the use
             // of the slick .bind(this) technique to correctly set "this"
             // when the callback is called
             $('#' + this.id + ' .btn-helloworld2').click(this.onHelloBtnClick.bind(this));
 
         },
+        onResetParamBtnClick: function(evt) {
+            localStorage.removeItem(this.id + '-params');
+            this.setupParamsFromLocalStorage();
+        },
+
+
         /**
          * onHelloBtnClick is an example of a button click event callback
          */

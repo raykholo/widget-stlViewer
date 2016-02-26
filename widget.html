@@ -59,7 +59,7 @@
         </div>
         <div class="panel-body">
             <!-- Nav tabs -->
-            <ul class="nav nav-tabs" role="tablist">
+            <ul class="nav nav-tabs" role="tablist" style="width:100%">
                 <li><a href="#com-chilipeppr-widget-stlViewer-tab1" role="tab" data-toggle="tab">Render</a>
                 </li>
                 <li class="active"><a href="#com-chilipeppr-widget-stlViewer-tab2" role="tab" data-toggle="tab">Slicing</a></li>
@@ -90,7 +90,15 @@
 
                 <!-- Tab 2 -->
                 <div class="tab-pane active" id="com-chilipeppr-widget-stlViewer-tab2">
-                    <br/>
+                    <!--<br/>-->
+                    <div class="col-md-3">T1</div>
+                    <div class="col-md-3">T2</div>
+                    <div class="col-md-3">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-xs btn-default btn-resetParams" data-delay="1000" data-animation="true" data-placement="auto" data-container="body" data-trigger="hover" data-title="Reset Params" data-content="Reset Slicing Parameters.  (This still requires a refresh for the parameter input fields to reset)">Reset Params
+                            </button>
+                        </div>
+                    </div>
                     <!--<p>Select your slicing parameters:</p>-->
                     <!--param start here-->
                     <div class="slicingParamForm" style="border: 0">
@@ -105,25 +113,25 @@
                         <div class="tab-content">
                             <div class="tab-pane active" id="com-chilipeppr-widget-stlViewer-paramPrintSettings">
                                 <table class="table slicingParamTablePrintSettings" style="width:100%">
-                                    
+
                                 </table>
                             </div>
 
                             <div class="tab-pane" id="com-chilipeppr-widget-stlViewer-paramFilamentSettings">
                                 <table class="table slicingParamTableFilamentSettings" style="width:100%">
-                                    
+
                                 </table>
                             </div>
 
                             <div class="tab-pane" id="com-chilipeppr-widget-stlViewer-paramMachineSettings">
                                 <table class="table slicingParamTableMachineSettings" style="width:100%">
-                                    
+
                                 </table>
                             </div>
 
                         </div>
-                        
-                        
+
+
                     </div>
 
                     <!--<table class="table slicingParamTable" style="width:100%">
