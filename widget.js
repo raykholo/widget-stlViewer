@@ -232,6 +232,8 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             
             console.log ("paramElements:  ", this.paramElements);
             
+            $('#' + that.id + ' .slicingParamTable').append (that.createHtmlElements (that.paramElements));
+            /*
             $.each(this.paramElements, function(index, elem) {
                 console.log("index:", index, "elem:", elem);
                 
@@ -264,7 +266,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     htmlString += "<input class=\"slicing-param slicing-param-" + index + "\" input-sm\" type=\"checkbox\" value=\"\">";
                     
                     
-                    htmlString += "</label>"
+                    htmlString += "</label>";
                 }
                 
                 htmlString += "</td>";
@@ -273,10 +275,16 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 
                 $('#' + that.id + ' .slicingParamTable').append (htmlString);
                 
-            });
+            });*/
         },
         
         paramElements: {
+            /*
+            printSettings: {
+                name: "Print Settings",
+                type:"escape"
+            },*/
+            
             layerHeight: {
                 name: "Layer Height",
                 type: "number",
@@ -324,6 +332,35 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 defaultValue: 3
             },
             
+            firstLayerTemp: {
+                name: "First Layer Temp",
+                type: "number",
+                properties: "min=\"1\" max=\"1000\" step=\"1\" value=\"200\"",
+                units: "&#8451",
+                defaultValue: 200
+            },
+            otherLayerTemp: {
+                name: "Other Layer Temp",
+                type: "number",
+                properties: "min=\"1\" max=\"1000\" step=\"1\" value=\"200\"",
+                units: "&#8451",
+                defaultValue: 200
+            },
+            firstLayerBedTemp: {
+                name: "First Layer Bed",
+                type: "number",
+                properties: "min=\"1\" max=\"1000\" step=\"1\" value=\"200\"",
+                units: "&#8451",
+                defaultValue: 200
+            },
+            otherLayerBedTemp: {
+                name: "Other Layer Bed",
+                type: "number",
+                properties: "min=\"1\" max=\"1000\" step=\"1\" value=\"200\"",
+                units: "&#8451",
+                defaultValue: 200
+            },
+            
             
             
             
@@ -364,6 +401,50 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             }
             
             
+        },
+        
+        createHtmlElements: function (inputJSON) {
+            var htmlString = "";
+            $.each(inputJSON, function(index, elem) {
+                console.log("index:", index, "elem:", elem);
+                
+                htmlString += "<tr>";
+                htmlString += "<td class=\"text-nowrap\" style=\"white-space: nowrap\">" + elem.name + "</td>";
+                htmlString += "<td align=\"right\">";
+                
+                if (elem.type == "number") {
+                    htmlString += "<div class=\"input-group input-group-sm\">";
+                    
+                    htmlString += "<input type=\"number\" id=\"exampleInputAmount\" class=\"form-control slicing-param slicing-param-" + index + "\"" + elem.properties + ">";
+                    htmlString += "<div class=\"input-group-addon\">" + elem.units + "</div>";
+                    
+                    htmlString += "</div>";
+                }
+                else if (elem.type == "select") {
+                    htmlString += "<select class=\"form-control slicing-param slicing-param-" + index + "\" input-sm\" style=\"width:auto\">";
+                    
+                    // console.log ("dropdown values:  ", elem.values);
+                    for (var i = 0; i < elem.values.length; i++) {
+                        htmlString += "<option value=\"" + elem.values[i] + "\">" + elem.values[i] + "</option>";
+                    }
+                    
+                    htmlString += "</select>";
+                }
+                else if (elem.type == "checkbox") {
+                    htmlString += "<label>";
+                    
+                    htmlString += "<input class=\"slicing-param slicing-param-" + index + "\" input-sm\" type=\"checkbox\" value=\"\">";
+                    
+                    
+                    htmlString += "</label>";
+                }
+                
+                htmlString += "</td>";
+                htmlString += "</tr>";
+                
+            });
+            console.log ("htmlString:  ", htmlString);
+            return (htmlString);
         },
         
         
