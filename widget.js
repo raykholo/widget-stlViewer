@@ -624,8 +624,8 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             }
             else {
                 console.log("param first load");
-                
-                
+
+
                 $('#' + this.id + ' .slicing-param').each(function(index, elem) {
                     console.log("index:", index, "elem:", elem);
                     var el = $(elem);
@@ -640,10 +640,10 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     //console.log ("defaultValue:  ", defaultValue);
 
                     //that.selectedParams[that.getUniqueParamName(clsName)] = defaultValue;
-                    
-                    
-                    
-                    
+
+
+
+
                 });
 
 
@@ -791,6 +791,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             });
 
             $('#' + this.id + ' .btn-resetParams').click(this.onResetParamBtnClick.bind(this));
+            $('#' + this.id + ' .btn-slice').click(this.onSliceBtnClick.bind(this));
 
 
             // Init Hello World 2 button on Tab 1. Notice the use
@@ -804,6 +805,30 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             this.setupParamsFromLocalStorage();
         },
 
+        onSliceBtnClick: function(evt) {
+            var settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "http://mockbin.org/bin/390b962c-e678-4e15-acee-74510d881057?foo=bar&foo=baz",
+                "method": "POST",
+                "headers": {
+                    "cookie": "foo=bar; bar=baz",
+                    "accept": "application/json",
+                    "content-type": "application/x-www-form-urlencoded"
+                },
+                "data": {
+                    "foo": "bar",
+                    "bar": "baz"
+                }
+            };
+
+            $.ajax(settings).done(function(response) {
+                console.log("ajax response: ", response);
+                
+                chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondropped", response, "composition.gcode");
+                
+            });
+        },
 
         /**
          * onHelloBtnClick is an example of a button click event callback
