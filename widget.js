@@ -261,7 +261,8 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     type: "number",
                     properties: "min=\"0.01\" max=\"1.8\" step=\"0.01\" value=\"0.3\"",
                     units: "mm",
-                    defaultValue: 0.3
+                    defaultValue: 0.3,
+                    nameforSlic3r: "--layer-height"
                 },
 
                 numPerimeters: {
@@ -269,7 +270,8 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     type: "number",
                     properties: "min=\"1\" max=\"99\" step=\"1\" value=\"3\"",
                     units: "shells",
-                    defaultValue: 3
+                    defaultValue: 3,
+                    nameforSlic3r: "--perimeters"
                 },
 
                 infillPattern: {
@@ -277,7 +279,8 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     type: "select",
                     values: ["Honeycomb", "Rectlinear"],
                     // defaultValue: "Rectlinear"
-                    defaultValue: "Honeycomb"
+                    defaultValue: "Honeycomb",
+                    nameforSlic3r: "--fill-pattern"
                 },
 
                 infillPercentage: {
@@ -285,7 +288,8 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     type: "number",
                     properties: "min=\"1\" max=\"100\" step=\"1\" value=\"30\"",
                     units: "%",
-                    defaultValue: 30
+                    defaultValue: 30,
+                    nameforSlic3r: "fill-density"
                 },
 
                 topLayers: {
@@ -293,7 +297,8 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     type: "number",
                     properties: "min=\"1\" max=\"100\" step=\"1\" value=\"3\"",
                     units: "layers",
-                    defaultValue: 3
+                    defaultValue: 3,
+                    nameforSlic3r: "--top-solid-layers"
                 },
 
                 bottomLayers: {
@@ -301,14 +306,16 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     type: "number",
                     properties: "min=\"1\" max=\"100\" step=\"1\" value=\"3\"",
                     units: "layers",
-                    defaultValue: 3
+                    defaultValue: 3,
+                    nameforSlic3r: "--bottom-solid-layers"
                 },
                 printSpeed: {
                     name: "Print Speed",
                     type: "number",
                     properties: "min=\"1\" max=\"300\" step=\"1\" value=\"65\"",
                     units: "mm/s",
-                    defaultValue: 65
+                    defaultValue: 65,
+                    nameforSlic3r: "--perimeter-speed" //Technically this needs to get broken into perimeter speed (60), infull speed (80), and support material speed (60)
                 },
 
                 travelSpeed: {
@@ -316,7 +323,8 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     type: "number",
                     properties: "min=\"1\" max=\"300\" step=\"1\" value=\"110\"",
                     units: "mm/s",
-                    defaultValue: 110
+                    defaultValue: 110,
+                    nameforSlic3r: "--travel-speed"
                 },
 
                 firstLayerSpeed: {
@@ -324,19 +332,24 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     type: "number",
                     properties: "min=\"1\" max=\"300\" step=\"1\" value=\"65\"",
                     units: "mm/s",
-                    defaultValue: 65
+                    defaultValue: 65,
+                    nameforSlic3r: "--first-layer-speed"
                 },
-
+                
+                //add fields for raft/ brim/ skirt
+                //xy-size-compensation
                 generateSupport: {
                     name: "Generate Support",
                     type: "checkbox",
-                    defaultValue: false
+                    defaultValue: false,
+                    nameforSlic3r: "--support-material"
                 },
 
                 spiralVaseMode: {
                     name: "Spiral Vase",
                     type: "checkbox",
-                    defaultValue: false
+                    defaultValue: false,
+                    nameforSlic3r: "--spiral-vase"
                 }
 
             },
@@ -346,43 +359,50 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     type: "number",
                     properties: "min=\"0.01\" max=\"10\" step=\".01\" value=\"1.7\"",
                     units: "mm",
-                    defaultValue: 1.7
+                    defaultValue: 1.7,
+                    nameforSlic3r: "--filament-diameter"
                 },
                 extrusionMultiplier: {
                     name: "Extrusion Multiplier",
                     type: "number",
                     properties: "min=\"0.01\" max=\"10\" step=\".01\" value=\"1\"",
                     units: "<b>x</b>",
-                    defaultValue: 1
+                    defaultValue: 1,
+                    nameforSlic3r: "--extrusion-multiplier"
                 },
                 firstLayerTemp: {
                     name: "First Layer Temp",
                     type: "number",
                     properties: "min=\"1\" max=\"1000\" step=\"1\" value=\"200\"",
                     units: "&#8451",
-                    defaultValue: 200
+                    defaultValue: 200,
+                    nameforSlic3r: "--first-layer-temperature"
                 },
                 otherLayerTemp: {
                     name: "Other Layer Temp",
                     type: "number",
                     properties: "min=\"1\" max=\"1000\" step=\"1\" value=\"200\"",
                     units: "&#8451",
-                    defaultValue: 200
+                    defaultValue: 200,
+                    nameforSlic3r: "--temperature"
                 },
                 firstLayerBedTemp: {
                     name: "First Layer Bed",
                     type: "number",
                     properties: "min=\"1\" max=\"1000\" step=\"1\" value=\"200\"",
                     units: "&#8451",
-                    defaultValue: 200
+                    defaultValue: 200,
+                    nameforSlic3r: "--first-layer-bed-temperature"
                 },
                 otherLayerBedTemp: {
                     name: "Other Layer Bed",
                     type: "number",
                     properties: "min=\"1\" max=\"1000\" step=\"1\" value=\"200\"",
                     units: "&#8451",
-                    defaultValue: 200
+                    defaultValue: 200,
+                    nameforSlic3r: "--bed-temperature"
                 }
+                //--cooling
             },
             machineSettings: {
                 nozzleDiameter: {
@@ -390,36 +410,52 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     type: "number",
                     properties: "min=\"0.1\" max=\"10\" step=\".01\" value=\"0.4\"",
                     units: "mm",
-                    defaultValue: 200
+                    defaultValue: 200,
+                    nameforSlic3r: "--nozzle-diameter"
                 },
                 bedSizeX: {
                     name: "Bed Size X",
                     type: "number",
                     properties: "min=\"1\" max=\"2000\" step=\"1\" value=\"200\"",
                     units: "mm",
-                    defaultValue: 200
+                    defaultValue: 200,
+                    nameforSlic3r: null
                 },
+                
                 bedSizeY: {
                     name: "Bed Size Y",
                     type: "number",
                     properties: "min=\"1\" max=\"2000\" step=\"1\" value=\"200\"",
                     units: "mm",
-                    defaultValue: 200
+                    defaultValue: 200,
+                    nameforSlic3r: null
                 },
-
+                //need x, y bed center -- this is what we pass to Slic3r
+                //z offset?
                 startGcode: {
                     name: "Start Gcode",
                     type: "textarea",
-                    defaultValue: "G28 ; home all axes\n;G1 Z5 F5000 ; lift nozzle"
+                    defaultValue: "G28 ; home all axes\n;G1 Z5 F5000 ; lift nozzle",
+                    nameforSlic3r: "--start-gcode"
                 },
                 endGcode: {
                     name: "End Gcode",
                     type: "textarea",
-                    defaultValue: "M104 S0 ; turn off temperature\nM140 S0\nG28 X0  ; home X axis\nM84     ; disable motors"
+                    defaultValue: "M104 S0 ; turn off temperature\nM140 S0\nG28 X0  ; home X axis\nM84     ; disable motors",
+                    nameforSlic3r: "--end-gcode"
                 }
             }
-
-
+            //add 4th text area for advanced users that want to append their other parameters.
+            
+        },
+        buildSlic3rParamString: function () {
+            //new empty string to build
+            
+            //for each key in paramElements, check that there is a corresponding value in selectedParams.  If nothing use all defaults.  
+            
+            //add paramElements[key].nameForSlic3r to string.  Add space.  Add value.  Add space. 
+            
+            //console.log completed string.
         },
 
         createHtmlElements: function(inputJSON) { //jQuery is fun
@@ -806,11 +842,14 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
         },
 
         onSliceBtnClick: function(evt) {
+            /*
             var settings = {
                 "async": true,
                 "crossDomain": true,
                 //"url": "http://mockbin.org/bin/390b962c-e678-4e15-acee-74510d881057?foo=bar&foo=baz",
-                "url": "//i2dcui.appspot.com/geturl?url=http://mockbin.org/bin/93071bc3-e3bd-4424-bd11-1ac27e08c32c?foo=bar&foo=baz",
+                //"url": "//i2dcui.appspot.com/slingshot?url=http://mockbin.org/bin/93071bc3-e3bd-4424-bd11-1ac27e08c32c?foo=bar&foo=baz",
+                // "url": "http://mockbin.org/bin/c1427327-ade1-4cfe-8820-507ac379027c?foo=bar&foo=baz",
+                "url": "http://mockbin.org/bin/e1372990-3a3a-4100-b085-b7a80c949c30?foo=bar&foo=baz",
                 "method": "POST",
                 "headers": {
                     //"cookie": "foo=bar; bar=baz",
@@ -828,7 +867,30 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 
                 chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondropped", response, "composition.gcode");
                 
+            });*/
+            
+            var formData = new FormData();
+            
+            
+            
+
+            var ajaxRequest = $.ajax({
+                type: "POST",
+                url: "api/Slic3rAPI/STLtoGcode",
+                contentType: false, //'application/json; charset=utf-8',
+                processData: false,
+                data: formData,
+                success: function(data) {
+                    //alert('Returned Data: ' + JSON.stringify(data));
+                    $('#txtOutput').val(JSON.stringify(data));
+                },
+                error: function(response) {
+                    alert('Error: ' + JSON.stringify(response.responseText));
+                }
             });
+
+
+
         },
 
         /**
