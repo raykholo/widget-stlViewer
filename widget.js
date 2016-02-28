@@ -169,6 +169,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             // Define a key:value pair here as strings to document what signals you subscribe to
             // so other widgets can publish to this widget to have it do something.
             // '/onExampleConsume': 'Example: This widget subscribe to this signal so other widgets can send to us and we'll do something with it.'
+            '/com-chilipeppr-widget-3dviewer/recv3dObject': 'Waiting for 3D Viewer Callback'
         },
         /**
          * Document the foreign publish signals, i.e. signals owned by other widgets
@@ -224,6 +225,9 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             this.init3d();
 
             //this.testCube();
+            
+            ///com-chilipeppr-widget-3dviewer/recv3dObject
+            chilipeppr.subscribe("com-chilipeppr-widget-3dviewer/recv3dObject", this, this.onRecv3dObject);
 
             console.log("I am done being initted.");
         },
@@ -335,7 +339,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     defaultValue: 65,
                     nameforSlic3r: "--first-layer-speed"
                 },
-                
+
                 //add fields for raft/ brim/ skirt
                 //xy-size-compensation
                 generateSupport: {
@@ -410,7 +414,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     type: "number",
                     properties: "min=\"0.1\" max=\"10\" step=\".01\" value=\"0.4\"",
                     units: "mm",
-                    defaultValue: 200,
+                    defaultValue: 0.4,
                     nameforSlic3r: "--nozzle-diameter"
                 },
                 bedSizeX: {
@@ -421,7 +425,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     defaultValue: 200,
                     nameforSlic3r: null
                 },
-                
+
                 bedSizeY: {
                     name: "Bed Size Y",
                     type: "number",
@@ -446,16 +450,72 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 }
             }
             //add 4th text area for advanced users that want to append their other parameters.
-            
+
         },
-        buildSlic3rParamString: function () {
+        buildSlic3rParamString: function() {
+            var that = this;
             //new empty string to build
-            
+            var slic3rParamString = "";
+
             //for each key in paramElements, check that there is a corresponding value in selectedParams.  If nothing use all defaults.  
-            
-            //add paramElements[key].nameForSlic3r to string.  Add space.  Add value.  Add space. 
-            
-            //console.log completed string.
+            $.each(that.paramElements, function(key, value) {
+                console.log("level 1. key:  ", key, " value:  ", value);
+
+                $.each(value, function(key2, value2) {
+                    console.log("level 2. key:  ", key2, " value:  ", value2, "selectedParams.key: ", that.selectedParams[key2]);
+
+                    if (!(that.selectedParams[key2] == undefined) && (value2.nameforSlic3r != null)) {
+                        console.log("Can use selected value:  ", that.selectedParams[key2]);
+
+                        //add paramElements[key].nameForSlic3r to string.  Add space.  Add value.  Add space. Repeat.
+                        switch (value2.type) {
+                            case "number":
+                                slic3rParamString += value2.nameforSlic3r + " " + String(that.selectedParams[key2]) + " ";
+                                break;
+                            case "textarea":
+                                var textAreaAsString = JSON.stringify(that.selectedParams[key2]);
+                                textAreaAsString = textAreaAsString.replace(/\"/g, "");
+                                //console.log ("textAreaAsString:  ", textAreaAsString);
+                                slic3rParamString += value2.nameforSlic3r + " " + textAreaAsString + " ";
+                                break;
+                            case "select":
+                                //slic3rParamString += value2.nameforSlic3r + " " + String(that.selectedParams[key2]) + " ";
+                                var selectAsString = that.selectedParams[key2];
+                                selectAsString = selectAsString.toLowerCase();
+                                //console.log ("selectAsString:  ", textAreaAsString);
+                                slic3rParamString += value2.nameforSlic3r + " " + selectAsString + " ";
+                                break;
+                            case "checkbox":
+                                if (that.selectedParams[key2] == true) {
+                                    slic3rParamString += value2.nameforSlic3r + " ";
+                                }
+                                break;
+                        }
+
+                    }
+                    else {
+                        console.log("VALUE UNDEFINED!");
+                    }
+
+
+                });
+
+
+
+            });
+
+
+
+
+            //log completed string.
+            console.log("Slic3r Param String:  ", slic3rParamString);
+
+            chilipeppr.publish(
+                "/com-chilipeppr-elem-flashmsg/flashmsg",
+                "Slic3r Param String",
+                slic3rParamString,
+                100000
+            );
         },
 
         createHtmlElements: function(inputJSON) { //jQuery is fun
@@ -686,7 +746,9 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             }
 
         },
-
+        onRecv3dObject: function () {
+            
+        },
 
         setupParamsFromLocalStorage_old: function() { //this func doesn't work yet. 
 
@@ -826,6 +888,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 );
             });
 
+            $('#' + this.id + ' .btn-testSlic3rParams').click(this.buildSlic3rParamString.bind(this));
             $('#' + this.id + ' .btn-resetParams').click(this.onResetParamBtnClick.bind(this));
             $('#' + this.id + ' .btn-slice').click(this.onSliceBtnClick.bind(this));
 
@@ -840,8 +903,13 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             localStorage.removeItem(this.id + '-params');
             this.setupParamsFromLocalStorage();
         },
-
+        sliceBtnWaitingForCallback: false,
         onSliceBtnClick: function(evt) {
+            
+            chilipeppr.publish("/com-chilipeppr-widget-3dviewer/request3dObject");
+            
+            this.sliceBtnWaitingForCallback = true;
+            
             /*
             var settings = {
                 "async": true,
@@ -868,12 +936,10 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondropped", response, "composition.gcode");
                 
             });*/
-            
+
             var formData = new FormData();
             
-            
-            
-
+            /*
             var ajaxRequest = $.ajax({
                 type: "POST",
                 url: "api/Slic3rAPI/STLtoGcode",
@@ -888,7 +954,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     alert('Error: ' + JSON.stringify(response.responseText));
                 }
             });
-
+            */
 
 
         },

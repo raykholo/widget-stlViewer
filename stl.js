@@ -41,7 +41,7 @@ var MeshesJS = MeshesJS || {};
         var material = new THREE.MeshPhongMaterial( { color: colorrandom, specular: 0x111111, shininess: 60 } );  //taken from slotted disk example of STLLoader.  Bright orange!  Gets your attention!
 
         //return three mesh here
-        var mesh = new THREE.Mesh( geometry, material );
+        var mesh = new THREE.Mesh( geometry, material );    //THIS MESH
         stl.add(mesh);
         
         var bbox = new THREE.BoundingBoxHelper(mesh, boxColor);
