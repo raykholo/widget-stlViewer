@@ -32,7 +32,8 @@ requirejs.config({
         ThreeFontUtils: '//i2dcui.appspot.com/js/three/FontUtils',
         ThreeHelvetiker: '//i2dcui.appspot.com/js/three/threehelvetiker',
         Clipper: '//i2dcui.appspot.com/js/clipper/clipper_unminified',
-        STLLoader: '//preview.c9users.io/raykholo/widget-stlviewer/stl'
+        STLLoader: '//preview.c9users.io/raykholo/widget-stlviewer/stl',
+        STLWriter: '//preview.c9users.io/raykholo/widget-stlviewer/StlWriter'
             //JSC3D: "//raw.githubusercontent.com/raykholo/widget-stlViewer/master/JSC3D"
     },
     shim: {
@@ -136,7 +137,7 @@ cprequire_test(["inline:com-chilipeppr-widget-stlViewer"], function(myWidget) {
 } /*end_test*/ );
 
 // This is the main definition of your widget. Give it a unique name.
-cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper", "jqueryuiWidget", "STLLoader"], function(cp, clipper, jqui, stlR) {
+cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper", "jqueryuiWidget", "STLLoader", "STLWriter"], function(cp, clipper, jqui, stlR, stlW) {
     return {
         /**
          * The ID of the widget. You must define this and make it unique.
@@ -211,7 +212,10 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             this.stlloader = new MeshesJS.STLLoader();
             console.log('and do we have the loader object, ', this.stlloader);
             
-            console.log ("ray, this inside cpdefine:  ", this);
+            this.stlWriter = new MeshesJS.STLWriter();
+            console.log('and do we have the writer object, ', this.stlWriter);
+            
+            //console.log ("ray, this inside cpdefine:  ", this);
             
             this.setupUiFromLocalStorage();
             this.btnSetup();
@@ -271,7 +275,11 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             //this.sceneAdd(stlObj);
         },
         
-        
+        getReadyToSlice: function () {
+            //var stlContentsAsString = this.stlWriter.toASCII (this.stlMasterObj);
+            
+            //console.log (stlContentsAsString);
+        },
         
         
         setupSlicingParamUI: function() {
@@ -899,7 +907,10 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
         },
         sliceBtnWaitingForCallback: false,
         onSliceBtnClick: function(evt) {
-            this.sliceBtnWaitingForCallback = true;
+            
+            this.getReadyToSlice();
+            
+            //this.sliceBtnWaitingForCallback = true;
             //chilipeppr.publish("/com-chilipeppr-widget-3dviewer/request3dObject");
             
             //this.get3dObj();
@@ -934,7 +945,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 
             });*/
 
-            var formData = new FormData();
+            //var formData = new FormData();
             
             /*
             var ajaxRequest = $.ajax({

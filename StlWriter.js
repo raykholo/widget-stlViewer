@@ -12,8 +12,8 @@ var MeshesJS = MeshesJS || {};
     // Constructor
     function STLWriter(objects, settings) {
         this.objects = objects;
-        this.multiple = Object.keys(objects).length > 1;
-        this.settings = _.defaults(settings || {}, STLWriter.globalSettings);
+        //this.multiple = Object.keys(objects).length > 1;
+        //this.settings = _.defaults(settings || {}, STLWriter.globalSettings);
     }
 
     // methods
@@ -23,21 +23,21 @@ var MeshesJS = MeshesJS || {};
              + (vertex.z + (offset.z || 0)) + '\n';
     }
 
-    STLWriter.prototype.toASCII = function() {
+    STLWriter.prototype.toASCII = function(input) {
         var object, faces, vertices, stl, x, y, z;
 
         stl = 'solid MeshesJS\n';
 
-        for (var name in this.objects) {
-            object = this.objects[name];
+        for (var name in input) {
+            object = input[name];
             faces = object.geometry.faces;
             vertices = object.geometry.vertices;
 
             var offsets = { x: 0, y: 0, z:0 };
-
+            /*
             if (this.multiple) {
                 _.assign(offsets, object.position);
-            }
+            }*/
 
             for (var i = 0; i < faces.length; i++) {
                 stl += 'facet normal ' + vertexToString(faces[i].normal, {});
@@ -68,14 +68,14 @@ var MeshesJS = MeshesJS || {};
         for (var name in this.objects) {
             object = this.objects[name];
             _geometry = object.geometry.clone();
-
+            /*
             if (this.multiple) {
                 _geometry.translate(
                     object.position.x,
                     object.position.y,
                     object.position.z
                 );
-            }
+            }*/
 
             geometry.merge(_geometry, object.matrix);
         }
@@ -102,14 +102,16 @@ var MeshesJS = MeshesJS || {};
     };
 
     STLWriter.prototype.save = function(filename) {
-        var filename = filename || this.settings.filename;
+        //var filename = filename || this.settings.filename;
+        /*
         if (this.settings.outputType === 'ascii') {
             var blob = new Blob([this.toASCII()], { type: 'text/plain' });
         } else {
             var blob = new Blob([this.toBinary()], { type: 'application/octet-binary' });
         }
+        */
         //saveAs(blob, filename);
-        return (blob, filename);
+        //return (blob, filename);
     };
 
     // global settings
