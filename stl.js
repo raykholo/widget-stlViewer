@@ -2,7 +2,9 @@
 var MeshesJS = MeshesJS || {};
 
 ;(function() {
-
+    
+    
+    
     // Constructor
     function STLLoader() {}
 
@@ -27,11 +29,13 @@ var MeshesJS = MeshesJS || {};
     };
 
     // methods
-    STLLoader.prototype.onGeometry = function(geometry, number) {
+    STLLoader.prototype.onGeometry = function(geometry, number, mainScope, fileInfo) {
         console.log("Geometry dropped STL no: ", number);
 
         var self = this;
-
+        
+        console.log ("self inside onGeometry:  ", self);
+        
         //render here, 
         var object = new THREE.Group();   
         var stl = new THREE.Group();        
@@ -65,12 +69,12 @@ var MeshesJS = MeshesJS || {};
         
         var boxColor = self.ColorLuminance(colorrandom, 0.4); // 40% lighter colorrandom
        
-        
+        //console.log ("ray mainscope:  ", mainScope);      //Getting back the scope of the main widget (ie "this" inside cpdefine)
         
         //chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneadd", stl);
-        chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneadd", object);
+        //chilipeppr.publish("/com-chilipeppr-widget-3dviewer/sceneadd", object);
         
-        
+        mainScope.onGotNewStlFile(geometry, mesh, stl, fileInfo);
         
         
         
@@ -78,12 +82,18 @@ var MeshesJS = MeshesJS || {};
     };
     STLLoader.prototype.onError = function(error) {};
 
-    STLLoader.prototype.loadFile = function(file, number) {
+    STLLoader.prototype.loadFile = function(file, number, mainScope) {
         console.log("Inside STL.js loadFile");
         console.log("Working with dropped STL no: ", number);
         // self alias
         var self = this;
-
+        
+        var fileInfo = {
+            name: file.name,
+            size: file.size
+        };
+        
+        console.log ("name: ", file.name);
         // file reader instance
         var reader = new FileReader();
 
@@ -99,7 +109,7 @@ var MeshesJS = MeshesJS || {};
             // Parse ASCII STL
             if (typeof this.result === 'string' ) {
                 console.log("Inside STL.js Found ASCII");
-                self.loadString(this.result, number);
+                self.loadString(this.result, number, mainScope, fileInfo);
                 return;
             }
 
@@ -127,14 +137,14 @@ var MeshesJS = MeshesJS || {};
 
             // parse binary STL
             console.log("Inside STL.js Binary STL");
-            self.loadBinaryData(view, faces, number);
+            self.loadBinaryData(view, faces, number, mainScope, fileInfo);
         };
 
         // start reading file as array buffer
         reader.readAsArrayBuffer(file);
     };
 
-    STLLoader.prototype.loadString = function(data, number) {
+    STLLoader.prototype.loadString = function(data, number, mainScope, fileInfo) {
         var length, normal, patternNormal, patternVertex, result, text;
         var geometry = new THREE.Geometry();
         var patternFace = /facet([\s\S]*?)endfacet/g;
@@ -169,10 +179,10 @@ var MeshesJS = MeshesJS || {};
         geometry.computeBoundingBox();
         geometry.computeBoundingSphere();
 
-        this.onGeometry(geometry, number);
+        this.onGeometry(geometry, number, mainScope, fileInfo);
     };
 
-    STLLoader.prototype.loadBinaryData = function(view, faces, number) {
+    STLLoader.prototype.loadBinaryData = function(view, faces, number, mainScope, fileInfo) {
         console.log('Yay We are inside loadBinaryData:   Face:', faces, ', View: ', view, ' Number: ', number );
         if (! view instanceof DataView) {
             var view = new DataView(view);
@@ -219,7 +229,7 @@ var MeshesJS = MeshesJS || {};
         geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
         geometry.addAttribute('normal', new THREE.BufferAttribute(normals, 3));
 
-        this.onGeometry(geometry, number);
+        this.onGeometry(geometry, number, mainScope, fileInfo);
     };
 
     // export module

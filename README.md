@@ -81,7 +81,7 @@ To better understand how ChiliPeppr's publish() method works see amplify.js's do
           </tr>
       </thead>
       <tbody>
-      <tr valign="top"><td>/com-chilipeppr-widget-stlViewer/com-chilipeppr-widget-3dviewer/recv3dObject</td><td>Waiting for 3D Viewer Callback</td></tr>    
+      <tr><td colspan="2">(No signals defined in this widget/element)</td></tr>    
       </tbody>
   </table>
 
@@ -138,12 +138,63 @@ other widgets know how to subscribe to them and what they do.</td></tr><tr valig
 or elements, that this widget/element publishes to.</td></tr><tr valign="top"><td>foreignSubscribe</td><td>object</td><td>Please see docs above.<br><br>Document the foreign subscribe signals, i.e. signals owned by other widgets
 or elements, that this widget/element subscribes to.</td></tr><tr valign="top"><td>stlloader</td><td>object</td><td>The main object for this widget is the STL Loader so
 it is available in this property for all methods to refer to.</td></tr><tr valign="top"><td>object</td><td>object</td><td></td></tr><tr valign="top"><td>init</td><td>function</td><td>function () <br><br>All widgets should have an init method. It should be run by the
-instantiating code like a workspace or a different widget.</td></tr><tr valign="top"><td>setupSlicingParamUI</td><td>function</td><td>function () </td></tr><tr valign="top"><td>paramElements</td><td>object</td><td></td></tr><tr valign="top"><td>buildSlic3rParamString</td><td>function</td><td>function () </td></tr><tr valign="top"><td>createHtmlElements</td><td>function</td><td>function (inputJSON)  //jQuery is fun</td></tr><tr valign="top"><td>bindSlicingParam</td><td>function</td><td>function () </td></tr><tr valign="top"><td>onParamChange</td><td>function</td><td>function (el, el2) </td></tr><tr valign="top"><td>selectedParams</td><td>object</td><td></td></tr><tr valign="top"><td>getUniqueParamName</td><td>function</td><td>function (input) </td></tr><tr valign="top"><td>combineInputDataTypes</td><td>function</td><td>function (value, ticked) </td></tr><tr valign="top"><td>setupParamsFromLocalStorage</td><td>function</td><td>function () </td></tr><tr valign="top"><td>onRecv3dObject</td><td>function</td><td>function () </td></tr><tr valign="top"><td>setupParamsFromLocalStorage_old</td><td>function</td><td>function ()  //this func doesn't work yet. </td></tr><tr valign="top"><td>saveParamsLocalStorage</td><td>function</td><td>function () <br><br>When a user changes a value that is stored as an option setting, you
+instantiating code like a workspace or a different widget.</td></tr><tr valign="top"><td>stlMasterObj</td><td>object</td><td></td></tr><tr valign="top"><td>stlMasterArr</td><td>object</td><td></td></tr><tr valign="top"><td>onGotNewStlFile</td><td>function</td><td>function (stlGeo, stlMesh, stlObj, info)    //voodoo, I call this from stl.js' onGeometry()</td></tr><tr valign="top"><td>setupSlicingParamUI</td><td>function</td><td>function () </td></tr><tr valign="top"><td>paramElements</td><td>object</td><td></td></tr><tr valign="top"><td>buildSlic3rParamString</td><td>function</td><td>function () </td></tr><tr valign="top"><td>createHtmlElements</td><td>function</td><td>function (inputJSON)  //jQuery is fun</td></tr><tr valign="top"><td>bindSlicingParam</td><td>function</td><td>function () </td></tr><tr valign="top"><td>onParamChange</td><td>function</td><td>function (el, el2) </td></tr><tr valign="top"><td>selectedParams</td><td>object</td><td></td></tr><tr valign="top"><td>getUniqueParamName</td><td>function</td><td>function (input) </td></tr><tr valign="top"><td>combineInputDataTypes</td><td>function</td><td>function (value, ticked) </td></tr><tr valign="top"><td>setupParamsFromLocalStorage</td><td>function</td><td>function () </td></tr><tr valign="top"><td>saveParamsLocalStorage</td><td>function</td><td>function () <br><br>When a user changes a value that is stored as an option setting, you
 should call this method immediately so that on next load the value
 is correctly set.</td></tr><tr valign="top"><td>testCube</td><td>function</td><td>function () </td></tr><tr valign="top"><td>btnSetup</td><td>function</td><td>function () <br><br>Call this method from init to setup all the buttons when this widget
 is first loaded. This basically attaches click events to your 
 buttons. It also turns on all the bootstrap popovers by scanning
-the entire DOM of the widget.</td></tr><tr valign="top"><td>onResetParamBtnClick</td><td>function</td><td>function (evt) </td></tr><tr valign="top"><td>sliceBtnWaitingForCallback</td><td>boolean</td><td></td></tr><tr valign="top"><td>onSliceBtnClick</td><td>function</td><td>function (evt) </td></tr><tr valign="top"><td>onHelloBtnClick</td><td>function</td><td>function (evt) <br><br>onHelloBtnClick is an example of a button click event callback</td></tr><tr valign="top"><td>options</td><td>object</td><td></td></tr><tr valign="top"><td>setupUiFromLocalStorage</td><td>function</td><td>function () <br><br>Call this method on init to setup the UI by reading the user's
+the entire DOM of the widget.</td></tr><tr valign="top"><td>onResetParamBtnClick</td><td>function</td><td>function (evt) <br><br>Call this method from init to setup all the buttons when this widget
+is first loaded. This basically attaches click events to your 
+buttons. It also turns on all the bootstrap popovers by scanning
+the entire DOM of the widget.
+/
+btnSetup: function() {<br><br>// Chevron hide/show body
+var that = this;
+$('#' + this.id + ' .hidebody').click(function(evt) {
+console.log("hide/unhide body");
+if ($('#' + that.id + ' .panel-body').hasClass('hidden')) {
+// it's hidden, unhide
+that.showBody(evt);
+}
+else {
+// hide
+that.hideBody(evt);
+}
+});<br><br>// Ask bootstrap to scan all the buttons in the widget to turn
+// on popover menus
+$('#' + this.id + ' .btn').popover({
+delay: 1000,
+animation: true,
+placement: "auto",
+trigger: "hover",
+container: 'body'
+});<br><br>// Init Say Hello Button on Main Toolbar
+// We are inlining an anonymous method as the callback here
+// as opposed to a full callback method in the Hello Word 2
+// example further below. Notice we have to use "that" so 
+// that the this is set correctly inside the anonymous method
+$('#' + this.id + ' .btn-sayhello').click(function() {
+console.log("saying hello");
+// Make sure popover is immediately hidden
+$('#' + that.id + ' .btn-sayhello').popover("hide");
+// Show a flash msg<br><br>chilipeppr.publish(
+"/com-chilipeppr-elem-flashmsg/flashmsg",
+"Slicer Params",
+JSON.stringify(that.selectedParams, null, 2),
+1000
+);
+});<br><br>$('#' + this.id + ' .btn-testSlic3rParams').click(this.buildSlic3rParamString.bind(this));
+$('#' + this.id + ' .btn-resetParams').click(this.onResetParamBtnClick.bind(this));
+$('#' + this.id + ' .btn-slice').click(this.onSliceBtnClick.bind(this));<br><br>
+// Init Hello World 2 button on Tab 1. Notice the use
+// of the slick .bind(this) technique to correctly set "this"
+// when the callback is called
+$('#' + this.id + ' .btn-helloworld2').click(this.onHelloBtnClick.bind(this));<br><br>},
+/*
+onRecv3dObject: function () {
+console.log ("received Object3D!");<br><br>if (this.sliceBtnWaitingForCallback == true) {<br><br>var group = new THREE.Object3D();//create an empty container<br><br>console.log ("waiting for and received Object3D!");<br><br>this.sliceBtnWaitingForCallback = false;
+}
+},</td></tr><tr valign="top"><td>sliceBtnWaitingForCallback</td><td>boolean</td><td></td></tr><tr valign="top"><td>onSliceBtnClick</td><td>function</td><td>function (evt) </td></tr><tr valign="top"><td>onHelloBtnClick</td><td>function</td><td>function (evt) <br><br>onHelloBtnClick is an example of a button click event callback</td></tr><tr valign="top"><td>options</td><td>object</td><td></td></tr><tr valign="top"><td>setupUiFromLocalStorage</td><td>function</td><td>function () <br><br>Call this method on init to setup the UI by reading the user's
 stored settings from localStorage and then adjust the UI to reflect
 what the user wants.</td></tr><tr valign="top"><td>saveOptionsLocalStorage</td><td>function</td><td>function () <br><br>When a user changes a value that is stored as an option setting, you
 should call this method immediately so that on next load the value

@@ -132,7 +132,7 @@ cprequire_test(["inline:com-chilipeppr-widget-stlViewer"], function(myWidget) {
     $('title').html(myWidget.name);
 
     myWidget.bind("body", null);
-
+    
 } /*end_test*/ );
 
 // This is the main definition of your widget. Give it a unique name.
@@ -169,7 +169,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             // Define a key:value pair here as strings to document what signals you subscribe to
             // so other widgets can publish to this widget to have it do something.
             // '/onExampleConsume': 'Example: This widget subscribe to this signal so other widgets can send to us and we'll do something with it.'
-            '/com-chilipeppr-widget-3dviewer/recv3dObject': 'Waiting for 3D Viewer Callback'
+            // '/com-chilipeppr-widget-3dviewer/recv3dObject': 'Waiting for 3D Viewer Callback'
         },
         /**
          * Document the foreign publish signals, i.e. signals owned by other widgets
@@ -189,6 +189,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             // that are owned by foreign/other widgets.
             // '/com-chilipeppr-elem-dragdrop/ondropped': 'Example: We subscribe to this signal at a higher priority to intercept the signal. We do not let it propagate by returning false.'
             '/com-chilipeppr-elem-dragdrop/ondroppedSTL': 'We subscribe to this signal at a higher priority to intercept the signal, double check if it is an Eagle Brd file and if so, we do not let it propagate by returning false. That way the 3D Viewer, Gcode widget, or other widgets will not get Eagle Brd file drag/drop events because they will not know how to interpret them.'
+            //'/com-chilipeppr-widget-3dviewer/recv3dObject': 'Waiting for 3D Viewer Callback'
         },
         /**
          * The main object for this widget is the STL Loader so
@@ -209,7 +210,9 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
             this.stlloader = new MeshesJS.STLLoader();
             console.log('and do we have the loader object, ', this.stlloader);
-
+            
+            console.log ("ray, this inside cpdefine:  ", this);
+            
             this.setupUiFromLocalStorage();
             this.btnSetup();
             this.forkSetup();
@@ -230,7 +233,47 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             chilipeppr.subscribe("com-chilipeppr-widget-3dviewer/recv3dObject", this, this.onRecv3dObject);
 
             console.log("I am done being initted.");
+            
+            //console.clear();
         },
+        
+        stlMasterObj: null,
+        stlMasterArr: [],
+        
+        
+        onGotNewStlFile: function (stlGeo, stlMesh, stlObj, info) {   //voodoo, I call this from stl.js' onGeometry()
+            
+            if(this.stlMasterObj == null) {
+                this.stlMasterObj = new THREE.Object3D();
+                console.log ("stlMasterObj - constructor called");
+                this.sceneAdd(this.stlMasterObj);
+            }
+            
+            console.log ("widget.js got file info: ", info);
+            this.stlMasterArr.push (info);
+            console.log ("stlMasterArr:  ", this.stlMasterArr);
+            
+            stlMesh.name = "stl-" + String(this.stlMasterArr.length-1);
+            
+            this.stlMasterObj.add (stlMesh);
+            
+            // console.log ()
+            /*
+            if (this.stlMasterArr.length > 1) {     //Just learning how to remove files
+                var objName = "stl-" + String(this.stlMasterArr.length - 2);
+                console.log ("name: ", objName  ,"obj to remove: ", this.stlMasterObj.getObjectByName(objName));
+                this.stlMasterObj.remove (this.stlMasterObj.getObjectByName(objName));
+            }*/
+            
+            // this.sceneAdd(stlMesh);
+            
+            
+            //this.sceneAdd(stlObj);
+        },
+        
+        
+        
+        
         setupSlicingParamUI: function() {
             var that = this;
 
@@ -249,12 +292,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             paramTableHtmlString = "";
             paramTableHtmlString += that.createHtmlElements(that.paramElements.machineSettings);
             $('#' + that.id + ' .slicingParamTableMachineSettings').append(paramTableHtmlString);
-
-
-
-
-
-
+            
         },
 
         paramElements: {
@@ -746,66 +784,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             }
 
         },
-        onRecv3dObject: function () {
-            
-        },
-
-        setupParamsFromLocalStorage_old: function() { //this func doesn't work yet. 
-
-            // Read vals from localStorage. Make sure to use a unique
-            // key specific to this widget so as not to overwrite other
-            // widgets' options. By using this.id as the prefix of the
-            // key we're safe that this will be unique.
-
-            // Feel free to add your own keys inside the options 
-            // object for your own items
-            var that = this;
-
-            var defaultParams = this.selectedParams;
-            //defaultParams.infillPattern = "Rectlinear";
-            console.log("Default Params:  ", defaultParams);
-
-            var options = localStorage.getItem(this.id + '-params');
-            if (options) {
-                options = $.parseJSON(options);
-                options.catchMe = "gotcha!"; //for testing
-                console.log("just evaled params: ", options);
-
-                //forEach param, if the key exists in selectedParams this means it is a needed key
-                //then replace the key with this one. then update html?  
-                $.each(options, function(key, value) {
-                    //key = JSON.stringify(key);
-                    //console.log('Debug:  Key = ', key); //, So KEY contains the NAME of the key (value)
-                    var defKey = defaultParams[key]; // but defaultparams.(.....) you want the ... to be the substituted name? (i.e insert key here)
-                    console.log("key:  ", key, " value:  ", value, "defKey:  ", defKey);
-                    //if (defaultParams.key != null) {
-                    if (defaultParams.hasOwnProperty(key)) { //key exists in json. Let's have some fun.
-                        // if (typeof(defaultParams.key) !== 'undefined') {
-                        console.log("do: ", key);
-
-                        var elemName = '#' + that.id + " .slicing-param-" + key;
-                        console.log("Recreated html class: ", elemName);
-
-                        $(elemName).val(value);
-
-                        console.log("that.selectedParams.key:  ", that.selectedParams[key]);
-                        //that.selectedParams.key = value;
-
-                    }
-                    else
-                        console.log("Caught: ", key);
-
-                });
-
-
-            }
-
-            // this.options.tabShowing
-
-            //this.options = options;
-            console.log("params:", options);
-
-        },
+        
         /**
          * When a user changes a value that is stored as an option setting, you
          * should call this method immediately so that on next load the value
@@ -899,16 +878,34 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             $('#' + this.id + ' .btn-helloworld2').click(this.onHelloBtnClick.bind(this));
 
         },
+        /*
+        onRecv3dObject: function () {
+            console.log ("received Object3D!");
+            
+            if (this.sliceBtnWaitingForCallback == true) {
+                
+                var group = new THREE.Object3D();//create an empty container
+                
+                console.log ("waiting for and received Object3D!");
+                
+                this.sliceBtnWaitingForCallback = false;
+            }
+        },*/
+        
+        
         onResetParamBtnClick: function(evt) {
             localStorage.removeItem(this.id + '-params');
             this.setupParamsFromLocalStorage();
         },
         sliceBtnWaitingForCallback: false,
         onSliceBtnClick: function(evt) {
-            
-            chilipeppr.publish("/com-chilipeppr-widget-3dviewer/request3dObject");
-            
             this.sliceBtnWaitingForCallback = true;
+            //chilipeppr.publish("/com-chilipeppr-widget-3dviewer/request3dObject");
+            
+            //this.get3dObj();
+            //console.log ("ray!: ", this.get3dObj() );
+            
+            
             
             /*
             var settings = {
@@ -1213,6 +1210,10 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 this.userCallbackForGet3dObj();
                 this.userCallbackForGet3dObj = null;
             }
+            
+            if (this.sliceBtnWaitingForCallback == true) {
+                console.log ("ray!: ", data);
+            }
         },
         is3dViewerReady: false,
         clear3dViewer: function() {
@@ -1334,7 +1335,9 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     //chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondragleave", "");
 
                     console.log("Files dropped: ", files);
-
+                    
+                    // console.log ("name: ", files[i].name);
+                    
                     for (var i = 0; i < files.length; i++) {
                         console.log('Loading STL no ', i);
                         $('#stlFileNames > tbody:last-child').append('<tr id="tr' + [i] + '"><td>' + [i] + '</td><td>' + files[i].name + '</td></tr>');
@@ -1342,7 +1345,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                             // parse binary STL
                             console.log('But do we have a loader?', that.stlloader);
                             console.log("what does loadFile look like?", that.stlloader.loadFile);
-                            that.stlloader.loadFile(files[i], i);
+                            that.stlloader.loadFile(files[i], i, that);
                             console.log('After Loadfile no ', i);
                         })(i);
 
