@@ -310,6 +310,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             var timeTook;
             
             var ajaxRequest = $.ajax({
+                //timeout:90000,
                 type: "POST",
                 url: "//cloudslice.cloudapp.net/api/Slic3rAPI/STLtoGcode",
                 contentType: false, //'application/json; charset=utf-8',

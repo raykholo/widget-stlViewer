@@ -25,7 +25,14 @@ var MeshesJS = MeshesJS || {};
 
     STLWriter.prototype.toASCII = function(input) {
         var object, faces, vertices, stl, x, y, z;
-
+        console.log ("object: ", object);
+        /*
+        if (object.geometry instanceof THREE.BufferGeometry) {  //this may need to be just object
+            object.geometry = new THREE.Geometry().fromBufferGeometry(object.geometry);
+            object.geometry.computeBoundingSphere();
+            object.geometry.computeBoundingBox();
+        }*/
+        
         stl = 'solid MeshesJS\n';
 
         for (var name in input) {
