@@ -133,7 +133,7 @@ cprequire_test(["inline:com-chilipeppr-widget-stlViewer"], function(myWidget) {
     $('title').html(myWidget.name);
 
     myWidget.bind("body", null);
-    
+
 } /*end_test*/ );
 
 // This is the main definition of your widget. Give it a unique name.
@@ -190,7 +190,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             // that are owned by foreign/other widgets.
             // '/com-chilipeppr-elem-dragdrop/ondropped': 'Example: We subscribe to this signal at a higher priority to intercept the signal. We do not let it propagate by returning false.'
             '/com-chilipeppr-elem-dragdrop/ondroppedSTL': 'We subscribe to this signal at a higher priority to intercept the signal, double check if it is an Eagle Brd file and if so, we do not let it propagate by returning false. That way the 3D Viewer, Gcode widget, or other widgets will not get Eagle Brd file drag/drop events because they will not know how to interpret them.'
-            //'/com-chilipeppr-widget-3dviewer/recv3dObject': 'Waiting for 3D Viewer Callback'
+                //'/com-chilipeppr-widget-3dviewer/recv3dObject': 'Waiting for 3D Viewer Callback'
         },
         /**
          * The main object for this widget is the STL Loader so
@@ -211,12 +211,12 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
             this.stlloader = new MeshesJS.STLLoader();
             console.log('and do we have the loader object, ', this.stlloader);
-            
+
             this.stlWriter = new MeshesJS.STLWriter();
             console.log('and do we have the writer object, ', this.stlWriter);
-            
+
             //console.log ("ray, this inside cpdefine:  ", this);
-            
+
             this.setupUiFromLocalStorage();
             this.btnSetup();
             this.forkSetup();
@@ -232,35 +232,35 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             this.init3d();
 
             //this.testCube();
-            
+
             ///com-chilipeppr-widget-3dviewer/recv3dObject
             chilipeppr.subscribe("com-chilipeppr-widget-3dviewer/recv3dObject", this, this.onRecv3dObject);
 
             console.log("I am done being initted.");
-            
+
             //console.clear();
         },
-        
+
         stlMasterObj: null,
         stlMasterArr: [],
-        
-        
-        onGotNewStlFile: function (stlGeo, stlMesh, stlObj, info) {   //voodoo, I call this from stl.js' onGeometry()
-            
-            if(this.stlMasterObj == null) {
+
+
+        onGotNewStlFile: function(stlGeo, stlMesh, stlObj, info) { //voodoo, I call this from stl.js' onGeometry()
+
+            if (this.stlMasterObj == null) {
                 this.stlMasterObj = new THREE.Object3D();
-                console.log ("stlMasterObj - constructor called");
+                console.log("stlMasterObj - constructor called");
                 this.sceneAdd(this.stlMasterObj);
             }
-            
-            console.log ("widget.js got file info: ", info);
-            this.stlMasterArr.push (info);
-            console.log ("stlMasterArr:  ", this.stlMasterArr);
-            
-            stlMesh.name = "stl-" + String(this.stlMasterArr.length-1);
-            
-            this.stlMasterObj.add (stlMesh);
-            
+
+            console.log("widget.js got file info: ", info);
+            this.stlMasterArr.push(info);
+            console.log("stlMasterArr:  ", this.stlMasterArr);
+
+            stlMesh.name = "stl-" + String(this.stlMasterArr.length - 1);
+
+            this.stlMasterObj.add(stlMesh);
+
             // console.log ()
             /*
             if (this.stlMasterArr.length > 1) {     //Just learning how to remove files
@@ -268,20 +268,84 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 console.log ("name: ", objName  ,"obj to remove: ", this.stlMasterObj.getObjectByName(objName));
                 this.stlMasterObj.remove (this.stlMasterObj.getObjectByName(objName));
             }*/
-            
+
             // this.sceneAdd(stlMesh);
-            
-            
+
+
             //this.sceneAdd(stlObj);
         },
-        
-        getReadyToSlice: function () {
-            //var stlContentsAsString = this.stlWriter.toASCII (this.stlMasterObj);
+
+        getReadyToSlice: function() {
+            var that = this;
             
+            if (this.stlMasterObj == null) {
+                chilipeppr.publish(
+                    "/com-chilipeppr-elem-flashmsg/flashmsg",
+                    "No STL Files",
+                    "You need to drag in at least 1 STL file to slice",
+                    5000
+                );
+                return;
+            }
+
+            console.log("stlMasterObj:  ", this.stlMasterObj);
+            var stlContentsAsString = this.stlWriter.toASCII(this.stlMasterObj.children);
             //console.log (stlContentsAsString);
+
+            var blob = new Blob([stlContentsAsString], {
+                type: 'text/plain'
+            });
+            console.log (blob);
+
+
+            var formData = new FormData();
+            formData.append("UploadedSTLFile", blob, "composition.stl");
+            formData.append("SlicerParams", this.buildSlic3rParamString());
+            formData.append("CreateLogFileTrueOrFalse", false);
+            
+            var d = new Date();
+            var timeStart = d.getTime();
+            console.log ("timeStart:  ", timeStart);
+            var timeEnd;
+            var timeTook;
+            
+            var ajaxRequest = $.ajax({
+                type: "POST",
+                url: "//cloudslice.cloudapp.net/api/Slic3rAPI/STLtoGcode",
+                contentType: false, //'application/json; charset=utf-8',
+                processData: false,
+                data: formData,
+                success: function(data) {
+                    timeEnd = d.getTime();
+                    console.log ("timeEnd:  ", timeEnd);
+                    timeTook = timeEnd-timeStart;
+                    console.log ("timeTook:  ", timeTook);
+                    // timeTook.toString();
+                    
+                    
+                    $('.com-chilipeppr-widget-stlViewer-gcode').text( String(data) );
+                    
+                    that.clear3dViewer();
+                    //$('.com-chilipeppr-widget-stlViewer-slicingTimeTook').text("Took: ", timeTook + " seconds");
+                    
+                    chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondropped", data, "composition.gcode");
+                    //alert('Returned Data: ' + JSON.stringify(data));
+                    //$('#txtOutput').val(data); //JSON.stringify(
+                    //$("#btnUploadFile").prop("disabled", false);
+                    //$("#imgLoader").css('visibility', 'hidden');
+                    return;
+                },
+                error: function(response) {
+                    alert('Error: ' + JSON.stringify(response.responseText));
+                    //$("#btnUploadFile").prop("disabled", false);
+                    //$("#imgLoader").css('visibility', 'hidden');
+                    return;
+                }
+            });
+
         },
-        
-        
+
+
         setupSlicingParamUI: function() {
             var that = this;
 
@@ -300,7 +364,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             paramTableHtmlString = "";
             paramTableHtmlString += that.createHtmlElements(that.paramElements.machineSettings);
             $('#' + that.id + ' .slicingParamTableMachineSettings').append(paramTableHtmlString);
-            
+
         },
 
         paramElements: {
@@ -505,13 +569,13 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
             //for each key in paramElements, check that there is a corresponding value in selectedParams.  If nothing use all defaults.  
             $.each(that.paramElements, function(key, value) {
-                console.log("level 1. key:  ", key, " value:  ", value);
+                //console.log("level 1. key:  ", key, " value:  ", value);
 
                 $.each(value, function(key2, value2) {
-                    console.log("level 2. key:  ", key2, " value:  ", value2, "selectedParams.key: ", that.selectedParams[key2]);
+                    //console.log("level 2. key:  ", key2, " value:  ", value2, "selectedParams.key: ", that.selectedParams[key2]);
 
                     if (!(that.selectedParams[key2] == undefined) && (value2.nameforSlic3r != null)) {
-                        console.log("Can use selected value:  ", that.selectedParams[key2]);
+                        //console.log("Can use selected value:  ", that.selectedParams[key2]);
 
                         //add paramElements[key].nameForSlic3r to string.  Add space.  Add value.  Add space. Repeat.
                         switch (value2.type) {
@@ -533,14 +597,14 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                                 break;
                             case "checkbox":
                                 if (that.selectedParams[key2] == true) {
-                                    slic3rParamString += value2.nameforSlic3r + " ";
+                                    //slic3rParamString += value2.nameforSlic3r + " ";
                                 }
                                 break;
                         }
 
                     }
                     else {
-                        console.log("VALUE UNDEFINED!");
+                        //console.log("VALUE UNDEFINED!");
                     }
 
 
@@ -555,13 +619,15 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
             //log completed string.
             console.log("Slic3r Param String:  ", slic3rParamString);
-
+            /*
             chilipeppr.publish(
                 "/com-chilipeppr-elem-flashmsg/flashmsg",
                 "Slic3r Param String",
                 slic3rParamString,
                 100000
-            );
+            );*/
+
+            return (slic3rParamString);
         },
 
         createHtmlElements: function(inputJSON) { //jQuery is fun
@@ -792,7 +858,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             }
 
         },
-        
+
         /**
          * When a user changes a value that is stored as an option setting, you
          * should call this method immediately so that on next load the value
@@ -899,25 +965,25 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 this.sliceBtnWaitingForCallback = false;
             }
         },*/
-        
-        
+
+
         onResetParamBtnClick: function(evt) {
             localStorage.removeItem(this.id + '-params');
             this.setupParamsFromLocalStorage();
         },
         sliceBtnWaitingForCallback: false,
         onSliceBtnClick: function(evt) {
-            
+
             this.getReadyToSlice();
-            
+
             //this.sliceBtnWaitingForCallback = true;
             //chilipeppr.publish("/com-chilipeppr-widget-3dviewer/request3dObject");
-            
+
             //this.get3dObj();
             //console.log ("ray!: ", this.get3dObj() );
-            
-            
-            
+
+
+
             /*
             var settings = {
                 "async": true,
@@ -946,7 +1012,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             });*/
 
             //var formData = new FormData();
-            
+
             /*
             var ajaxRequest = $.ajax({
                 type: "POST",
@@ -1221,9 +1287,9 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 this.userCallbackForGet3dObj();
                 this.userCallbackForGet3dObj = null;
             }
-            
+
             if (this.sliceBtnWaitingForCallback == true) {
-                console.log ("ray!: ", data);
+                console.log("ray!: ", data);
             }
         },
         is3dViewerReady: false,
@@ -1346,9 +1412,9 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     //chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondragleave", "");
 
                     console.log("Files dropped: ", files);
-                    
+
                     // console.log ("name: ", files[i].name);
-                    
+
                     for (var i = 0; i < files.length; i++) {
                         console.log('Loading STL no ', i);
                         $('#stlFileNames > tbody:last-child').append('<tr id="tr' + [i] + '"><td>' + [i] + '</td><td>' + files[i].name + '</td></tr>');
