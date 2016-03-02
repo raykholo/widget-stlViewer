@@ -341,11 +341,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             formData.append("SlicerParams", this.buildSlic3rParamString());
             formData.append("CreateLogFileTrueOrFalse", false);
             
-            var d = new Date();
-            var timeStart = d.getTime();
-            console.log ("timeStart:  ", timeStart);
-            var timeEnd;
-            var timeTook;
+
             
             var ajaxRequest = $.ajax({
                 //timeout:90000,
@@ -355,11 +351,6 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                 processData: false,
                 data: formData,
                 success: function(data) {
-                    timeEnd = d.getTime();
-                    console.log ("timeEnd:  ", timeEnd);
-                    timeTook = timeEnd-timeStart;
-                    console.log ("timeTook:  ", timeTook);
-                    // timeTook.toString();
                     
                     
                     $('.com-chilipeppr-widget-stlViewer-gcode').text( String(data) );
