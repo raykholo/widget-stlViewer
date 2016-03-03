@@ -256,8 +256,18 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             console.log("widget.js got file info: ", info);
             this.stlMasterArr.push(info);
             console.log("stlMasterArr:  ", this.stlMasterArr);
+            console.log("stlMasterObj:  ", this.stlMasterObj);
 
             stlMesh.name = "stl-" + String(this.stlMasterArr.length - 1);
+            
+            //temporary move by dimension/2 to make sure it is in positive xy (z?) territory
+            
+            console.log ("current mesh: ", stlMesh);
+            
+            stlMesh.geometry.computeBoundingBox();
+            // console.log ("x dim:  ", stlMesh.geometry.boundingBox.max.x);
+            
+            //stlMesh.position.set ( (stlMesh.geometry.boundingBox.max.x) + 1, (stlMesh.geometry.boundingBox.max.y) + 1, (stlMesh.geometry.boundingBox.max.z) + 1 );
 
             this.stlMasterObj.add(stlMesh);
 
@@ -303,10 +313,10 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             formData.append("SlicerParams", this.buildSlic3rParamString());
             formData.append("CreateLogFileTrueOrFalse", false);
             
-
-            
+            //start ajax
+            ///*
             var ajaxRequest = $.ajax({
-                //timeout:90000,
+                timeout:900000,
                 type: "POST",
                 url: "//cloudslice.cloudapp.net/api/Slic3rAPI/STLtoGcode",
                 contentType: false, //'application/json; charset=utf-8',
@@ -334,6 +344,8 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
                     return;
                 }
             });
+            //*/
+            //end ajax
 
         },
 

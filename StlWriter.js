@@ -1,13 +1,16 @@
 // namespace
 var MeshesJS = MeshesJS || {};
 
-;(function() {
+;
+(function() {
 
     // global settings
     var globalSettings = {
         outputType: 'ascii',
         filename: 'output.stl'
     };
+    
+    
 
     // Constructor
     function STLWriter(objects, settings) {
@@ -18,29 +21,46 @@ var MeshesJS = MeshesJS || {};
 
     // methods
     function vertexToString(vertex, offset) {
-        return (vertex.x + (offset.x || 0)) + ' '
-             + (vertex.y + (offset.y || 0)) + ' '
-             + (vertex.z + (offset.z || 0)) + '\n';
+        return (vertex.x + (offset.x || 0)) + ' ' + (vertex.y + (offset.y || 0)) + ' ' + (vertex.z + (offset.z || 0)) + '\n';
     }
 
     STLWriter.prototype.toASCII = function(input) {
         var object, faces, vertices, stl, x, y, z;
-        console.log ("object: ", object);
+        console.log("input: ", input);
         /*
         if (object.geometry instanceof THREE.BufferGeometry) {  //this may need to be just object
             object.geometry = new THREE.Geometry().fromBufferGeometry(object.geometry);
             object.geometry.computeBoundingSphere();
             object.geometry.computeBoundingBox();
         }*/
-        
+
         stl = 'solid MeshesJS\n';
 
         for (var name in input) {
+            // console.log("inside input loop. name: ", name);
             object = input[name];
+            
+            
+            console.log("inside input loop. object: ", object);
+            
+            if (object.geometry instanceof THREE.BufferGeometry) { //this may need to be just object
+                console.log ("this is buffer geometry");
+                object.geometry = new THREE.Geometry().fromBufferGeometry(object.geometry);
+                object.geometry.computeBoundingSphere();
+                object.geometry.computeBoundingBox();
+                
+                console.log ("converted to regular geometry:  ", object);
+            }
+            
             faces = object.geometry.faces;
             vertices = object.geometry.vertices;
 
-            var offsets = { x: 0, y: 0, z:0 };
+
+            var offsets = {
+                x: 0,
+                y: 0,
+                z: 0
+            };
             /*
             if (this.multiple) {
                 _.assign(offsets, object.position);
@@ -96,7 +116,7 @@ var MeshesJS = MeshesJS || {};
         view.setUint32(offset, geometry.faces.length, true);
         offset += 4;
 
-        for(var n = 0; n < geometry.faces.length; n++) {
+        for (var n = 0; n < geometry.faces.length; n++) {
             face = geometry.faces[n];
             offset = writeVector(view, offset, face.normal);
             offset = writeVector(view, offset, geometry.vertices[face.a]);
