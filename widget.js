@@ -247,7 +247,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
         stlMasterArr: [],
 
 
-        onGotNewStlFile: function(stlGeo, stlMesh, stlObj, info) { //voodoo, I call this from stl.js' onGeometry()
+        onGotNewStlFile: function(stlGeo, stlMesh, stlObj, info) { //voodoo, I call this from stl.js' onGeometry().  It's like a hardcoded callback
 
             if (this.stlMasterObj == null) {
                 this.stlMasterObj = new THREE.Object3D();
