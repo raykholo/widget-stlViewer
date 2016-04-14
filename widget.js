@@ -228,6 +228,8 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             this.setupSlicingParamUI();
             this.bindSlicingParam();
             this.setupParamsFromLocalStorage();
+            this.setupApiTab();
+
 
             this.setupDragDrop();
 
@@ -261,14 +263,14 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             console.log("stlMasterObj:  ", this.stlMasterObj);
 
             stlMesh.name = "stl-" + String(this.stlMasterArr.length - 1);
-            
+
             //temporary move by dimension/2 to make sure it is in positive xy (z?) territory
-            
-            console.log ("current mesh: ", stlMesh);
-            
+
+            console.log("current mesh: ", stlMesh);
+
             stlMesh.geometry.computeBoundingBox();
             // console.log ("x dim:  ", stlMesh.geometry.boundingBox.max.x);
-            
+
             //stlMesh.position.set ( (stlMesh.geometry.boundingBox.max.x) + 1, (stlMesh.geometry.boundingBox.max.y) + 1, (stlMesh.geometry.boundingBox.max.z) + 1 );
 
             this.stlMasterObj.add(stlMesh);
@@ -289,7 +291,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
 
         getReadyToSlice: function() {
             var that = this;
-            
+
             if (this.stlMasterObj == null) {
                 chilipeppr.publish(
                     "/com-chilipeppr-elem-flashmsg/flashmsg",
@@ -307,31 +309,31 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             var blob = new Blob([stlContentsAsString], {
                 type: 'text/plain'
             });
-            console.log (blob);
+            console.log(blob);
 
 
             var formData = new FormData();
             formData.append("UploadedSTLFile", blob, "composition.stl");
             formData.append("SlicerParams", this.buildSlic3rParamString());
             formData.append("CreateLogFileTrueOrFalse", false);
-            
+
             //start ajax
             ///*
             var ajaxRequest = $.ajax({
-                timeout:900000,
+                timeout: 900000,
                 type: "POST",
                 url: "//cloudslice.cloudapp.net/api/Slic3rAPI/STLtoGcode",
                 contentType: false, //'application/json; charset=utf-8',
                 processData: false,
                 data: formData,
                 success: function(data) {
-                    
-                    
-                    $('.com-chilipeppr-widget-stlViewer-gcode').text( String(data) );
-                    
+
+
+                    $('.com-chilipeppr-widget-stlViewer-gcode').text(String(data));
+
                     that.clear3dViewer();
                     //$('.com-chilipeppr-widget-stlViewer-slicingTimeTook').text("Took: ", timeTook + " seconds");
-                    
+
                     chilipeppr.publish("/com-chilipeppr-elem-dragdrop/ondropped", data, "composition.gcode");
                     //alert('Returned Data: ' + JSON.stringify(data));
                     //$('#txtOutput').val(data); //JSON.stringify(
@@ -762,6 +764,7 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             }
             return valueToWrite;
         },
+
         setupParamsFromLocalStorage: function() {
             var that = this;
 
@@ -895,6 +898,67 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             this.sceneAdd(cube);
             this.sceneAdd(edges);
         },
+        smoothieIpAddress: null,
+        setupApiTab: function() {
+            var that = this;
+            $('#' + this.id + ' .input-ipAddr').change(function(evt) {
+                that.smoothieIpAddress = evt.target.value;
+                console.log("ip changed:  ", that.smoothieIpAddress);
+
+                that.options.smoothieIpAddress = that.smoothieIpAddress;
+                that.saveOptionsLocalStorage();
+            });
+
+
+        },
+
+        smoothiePostGcode: function() {
+            var that = this;
+            console.log("btn-smoothieSendGcode clicked");
+            var gcodeData = $('.com-chilipeppr-widget-stlViewer-gcode').val();
+
+            var blob = new Blob([gcodeData], {
+                type: 'text/plain'
+            });
+            console.log(blob);
+
+
+            //var formData = new FormData();
+            //formData.append('X-Filename', blob, "chilipeppertest1.gcode");
+            //formData.append("SlicerParams", this.buildSlic3rParamString());
+            //formData.append("CreateLogFileTrueOrFalse", false);
+
+            //start ajax
+            ///*
+            var ajaxRequest = $.ajax({
+                timeout: 900000,
+                type: "POST",
+                //url: "//" + that.smoothieIpAddress,
+                url: '//192.168.2.193/upload',
+                contentType: false, //'application/json; charset=utf-8',
+                processData: false,
+                data: blob,
+                headers: {
+                    "X-Filename": "chilipeppertest1.gcode"
+                },
+
+                success: function(data) {
+                    //$('.com-chilipeppr-widget-stlViewer-gcode').val();
+                    return;
+                },
+                error: function(response) {
+                    //alert('Error: ' + JSON.stringify(response.responseText));
+                    console.log ("ajax error");
+                    //$("#btnUploadFile").prop("disabled", false);
+                    //$("#imgLoader").css('visibility', 'hidden');
+                    return;
+                }
+            });
+            //*/
+            //end ajax
+
+
+        },
 
         /**
          * Call this method from init to setup all the buttons when this widget
@@ -956,6 +1020,8 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             // of the slick .bind(this) technique to correctly set "this"
             // when the callback is called
             $('#' + this.id + ' .btn-helloworld2').click(this.onHelloBtnClick.bind(this));
+
+            $('#' + this.id + ' .btn-smoothieSendGcode').click(this.smoothiePostGcode.bind(this));
 
         },
         /*
@@ -1099,6 +1165,11 @@ cpdefine("inline:com-chilipeppr-widget-stlViewer", ["chilipeppr_ready", "Clipper
             }
             else {
                 this.hideBody();
+            }
+
+            if (options.smoothieIpAddress) {
+                this.smoothieIpAddress = options.smoothieIpAddress;
+                $('#' + this.id + ' .input-ipAddr').val(options.smoothieIpAddress);
             }
 
         },

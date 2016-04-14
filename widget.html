@@ -259,17 +259,33 @@
                 <!-- Tab 3 -->
                 <div class="tab-pane" id="com-chilipeppr-widget-stlViewer-tab3">
                     Gcode Output:
-                    <textarea rows="15" cols="20" class="form-control com-chilipeppr-widget-stlViewer-gcode" style="max-width:300px; max-height:300px">
+                    <textarea rows="4" cols="20" class="form-control com-chilipeppr-widget-stlViewer-gcode" style="max-width:300px; max-height:300px">
                     </textarea>
-                    
-                    <label class="com-chilipeppr-widget-stlViewer-slicingTimeTook"></label>
+
+                    <!--<label class="com-chilipeppr-widget-stlViewer-slicingTimeTook"></label>-->
+                    </br>
+                    <button class="btn" type="button" data-toggle="collapse" data-target=".api-control-section" aria-expanded="true" aria-controls="api-control-section">
+                        Smoothieboard Control Panel
+                    </button>
+                    <div class="collapse.in api-control-section">
+                        <div class="form-group">
+                            <label for="input-ipAddr">Smoothieboard IP Address: </label>
+                            <input type="text" class="form-control input-ipAddr">
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-xs btn-default btn-smoothieSendGcode" >Send Gcode to Smoothie
+                            </button>
+                        </div>
+                        
+                        
+
+                    </div>
 
                 </div>
 
             </div>
-
         </div>
-    </div>
 </body>
 
 </html>
